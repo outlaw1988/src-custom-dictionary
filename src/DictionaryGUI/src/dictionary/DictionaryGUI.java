@@ -30,7 +30,6 @@ public class DictionaryGUI extends javax.swing.JFrame {
         welcome = new javax.swing.JLabel();
         enterSet = new javax.swing.JLabel();
         setName = new javax.swing.JTextField();
-        next = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interactive dictionary");
@@ -40,18 +39,11 @@ public class DictionaryGUI extends javax.swing.JFrame {
         welcome.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         welcome.setText("Welcome in interactive dictionary");
 
-        enterSet.setText("Please, enter the set name:");
+        enterSet.setText("Type the set name and press enter:");
 
         setName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 setNameActionPerformed(evt);
-            }
-        });
-
-        next.setText("Next");
-        next.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nextActionPerformed(evt);
             }
         });
 
@@ -63,16 +55,14 @@ public class DictionaryGUI extends javax.swing.JFrame {
                 .addContainerGap(153, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(next, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(193, 193, 193))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(setName, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(159, 159, 159))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(enterSet)
-                        .addGap(136, 136, 136))
                     .addComponent(welcome, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 460, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(147, 147, 147))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(251, 251, 251)
+                .addComponent(enterSet)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -83,9 +73,7 @@ public class DictionaryGUI extends javax.swing.JFrame {
                 .addComponent(enterSet)
                 .addGap(18, 18, 18)
                 .addComponent(setName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(next)
-                .addContainerGap(185, Short.MAX_VALUE))
+                .addContainerGap(228, Short.MAX_VALUE))
         );
 
         enterSet.getAccessibleContext().setAccessibleParent(welcome);
@@ -94,16 +82,12 @@ public class DictionaryGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void setNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setNameActionPerformed
-        categoryName = setName.getText();
-        System.out.println(categoryName);
-    }//GEN-LAST:event_setNameActionPerformed
-
-    private void nextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextActionPerformed
-        CategoryScreen catScreen = new CategoryScreen();
+        wordsSetNameStr = setName.getText();
+        CategoryScreen catScreen = new CategoryScreen(wordsSetNameStr);
         catScreen.setLocationRelativeTo(null);
         catScreen.setVisible(true);
         this.dispose();
-    }//GEN-LAST:event_nextActionPerformed
+    }//GEN-LAST:event_setNameActionPerformed
 
     /**
      * @param args the command line arguments
@@ -142,11 +126,10 @@ public class DictionaryGUI extends javax.swing.JFrame {
         });
     }
 
-    private String categoryName;
+    private String wordsSetNameStr;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel enterSet;
-    private javax.swing.JButton next;
     private javax.swing.JTextField setName;
     private javax.swing.JLabel welcome;
     // End of variables declaration//GEN-END:variables

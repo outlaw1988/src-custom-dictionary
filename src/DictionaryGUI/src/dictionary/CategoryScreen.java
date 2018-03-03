@@ -5,6 +5,13 @@
  */
 package dictionary;
 
+import java.io.*;
+import java.util.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 /**
  *
  * @author jakub
@@ -17,6 +24,14 @@ public class CategoryScreen extends javax.swing.JFrame {
     public CategoryScreen() {
         initComponents();
     }
+    
+    public CategoryScreen(String wordsSetNameStr) {
+        initComponents();
+        this.wordsSetName.setText(wordsSetNameStr);
+        this.category = wordsSetNameStr;
+        readJsonFile();
+        setLanguages();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -28,8 +43,8 @@ public class CategoryScreen extends javax.swing.JFrame {
     private void initComponents() {
 
         enterWords = new javax.swing.JLabel();
-        english = new javax.swing.JLabel();
-        polish = new javax.swing.JLabel();
+        language1label = new javax.swing.JLabel();
+        language2label = new javax.swing.JLabel();
         enField1 = new javax.swing.JTextField();
         polField1 = new javax.swing.JTextField();
         enField2 = new javax.swing.JTextField();
@@ -40,55 +55,85 @@ public class CategoryScreen extends javax.swing.JFrame {
         polField4 = new javax.swing.JTextField();
         enField5 = new javax.swing.JTextField();
         polField5 = new javax.swing.JTextField();
-        nextButt = new javax.swing.JButton();
+        performExam = new javax.swing.JButton();
         prevButt = new javax.swing.JButton();
+        wordsSetName = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interactive dictionary");
-        setPreferredSize(new java.awt.Dimension(760, 506));
         setResizable(false);
 
         enterWords.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        enterWords.setText("Enter words:");
+        enterWords.setText("Enter words for set:");
 
-        english.setText("English");
+        language1label.setText("English");
 
-        polish.setText("Polish");
+        language2label.setText("Polish");
 
-        enField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enField1ActionPerformed(evt);
+        enField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                enField1FocusLost(evt);
             }
         });
 
-        enField2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enField2ActionPerformed(evt);
+        polField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                polField1FocusLost(evt);
             }
         });
 
-        enField3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enField3ActionPerformed(evt);
+        enField2.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                enField2FocusLost(evt);
             }
         });
 
-        enField4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enField4ActionPerformed(evt);
+        polField2.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                polField2FocusLost(evt);
             }
         });
 
-        enField5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                enField5ActionPerformed(evt);
+        enField3.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                enField3FocusLost(evt);
             }
         });
 
-        nextButt.setText("Next");
-        nextButt.addActionListener(new java.awt.event.ActionListener() {
+        polField3.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                polField3FocusLost(evt);
+            }
+        });
+
+        enField4.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                enField4FocusLost(evt);
+            }
+        });
+
+        polField4.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                polField4FocusLost(evt);
+            }
+        });
+
+        enField5.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                enField5FocusLost(evt);
+            }
+        });
+
+        polField5.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                polField5FocusLost(evt);
+            }
+        });
+
+        performExam.setText("Perform exam");
+        performExam.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nextButtActionPerformed(evt);
+                performExamActionPerformed(evt);
             }
         });
 
@@ -99,61 +144,71 @@ public class CategoryScreen extends javax.swing.JFrame {
             }
         });
 
+        wordsSetName.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        wordsSetName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(188, 188, 188)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(50, 50, 50)
-                        .addComponent(english)
-                        .addGap(178, 178, 178)
-                        .addComponent(polish))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(125, 125, 125)
-                                .addComponent(enterWords))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(polField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(enField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(polField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(enField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(polField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(enField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(polField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(enField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(polField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(193, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(46, 46, 46)
                 .addComponent(prevButt)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(nextButt)
+                .addComponent(performExam)
                 .addGap(40, 40, 40))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(188, 188, 188)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(50, 50, 50)
+                                .addComponent(language1label)
+                                .addGap(178, 178, 178)
+                                .addComponent(language2label))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(63, 63, 63)
+                                    .addComponent(polField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(enField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(63, 63, 63)
+                                        .addComponent(polField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(enField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(63, 63, 63)
+                                        .addComponent(polField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(enField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(63, 63, 63)
+                                        .addComponent(polField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(enField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(63, 63, 63)
+                                        .addComponent(polField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(276, 276, 276)
+                        .addComponent(enterWords))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(wordsSetName, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(118, 118, 118)))
+                .addContainerGap(193, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(102, 102, 102)
+                .addGap(59, 59, 59)
                 .addComponent(enterWords)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(wordsSetName, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(english)
-                    .addComponent(polish))
+                    .addComponent(language1label)
+                    .addComponent(language2label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -177,41 +232,112 @@ public class CategoryScreen extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 139, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(prevButt)
-                    .addComponent(nextButt))
+                    .addComponent(performExam))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void enField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enField1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enField1ActionPerformed
+    private void readJsonFile() {
+        JSONParser parser = new JSONParser();
+        
+        try {
+            Object obj = parser.parse(new FileReader("wordsSet.json"));
+            this.jsonObj = (JSONObject) obj;
+        }
+        catch(FileNotFoundException e) { e.printStackTrace(); }
+        catch(IOException e) { e.printStackTrace(); }
+        catch(ParseException e) { e.printStackTrace(); }
+        catch(Exception e) { e.printStackTrace(); }
+    }
+    
+    // TODO Make this json human readable
+    private void writeToJsonFile() throws IOException {
+        System.out.println("Action performed");
+        
+        JSONArray cat = new JSONArray();
+        
+        JSONObject jsonInCat = new JSONObject();
+        jsonInCat.put("language1", this.language1);
+        jsonInCat.put("language2", this.language2);
+        jsonInCat.put("words1", this.words1);
+        jsonInCat.put("words2", this.words2);
+        
+        cat.add(jsonInCat);
+        jsonObj.put(this.category, cat);
+        
+        try {
+            FileWriter file = new FileWriter("wordsSet.json");
+            file.write(jsonObj.toJSONString());
+            file.flush();
+            System.out.println("JSON object: " + jsonObj);
+        }
+        catch(IOException e) { e.printStackTrace(); }
 
-    private void enField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enField2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enField2ActionPerformed
-
-    private void enField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enField3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enField3ActionPerformed
-
-    private void enField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enField4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enField4ActionPerformed
-
-    private void enField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enField5ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_enField5ActionPerformed
-
-    private void nextButtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_nextButtActionPerformed
+    }
+    
+    private void performExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_performExamActionPerformed
+        try { writeToJsonFile(); }
+        catch(IOException e) { e.printStackTrace(); }
+    }//GEN-LAST:event_performExamActionPerformed
 
     private void prevButtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prevButtActionPerformed
-        // TODO add your handling code here:
+        DictionaryGUI mainScreen = new DictionaryGUI();
+        mainScreen.setLocationRelativeTo(null);
+        mainScreen.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_prevButtActionPerformed
 
+    // TODO consider case when string is empty
+    // TODO make loop for buttons - in automatic way
+    
+    private void enField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField1FocusLost
+        words1.add(enField1.getText());
+    }//GEN-LAST:event_enField1FocusLost
+
+    private void enField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField2FocusLost
+        words1.add(enField2.getText());
+    }//GEN-LAST:event_enField2FocusLost
+
+    private void enField3FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField3FocusLost
+        words1.add(enField3.getText());
+    }//GEN-LAST:event_enField3FocusLost
+
+    private void enField4FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField4FocusLost
+        words1.add(enField4.getText());
+    }//GEN-LAST:event_enField4FocusLost
+
+    private void enField5FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField5FocusLost
+        words1.add(enField5.getText());
+    }//GEN-LAST:event_enField5FocusLost
+
+    private void polField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField1FocusLost
+        words2.add(polField1.getText());
+    }//GEN-LAST:event_polField1FocusLost
+
+    private void polField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField2FocusLost
+        words2.add(polField2.getText());
+    }//GEN-LAST:event_polField2FocusLost
+
+    private void polField3FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField3FocusLost
+        words2.add(polField3.getText());
+    }//GEN-LAST:event_polField3FocusLost
+
+    private void polField4FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField4FocusLost
+        words2.add(polField4.getText());
+    }//GEN-LAST:event_polField4FocusLost
+
+    private void polField5FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField5FocusLost
+        words2.add(polField5.getText());
+    }//GEN-LAST:event_polField5FocusLost
+
+    // TODO Make languages available to choose
+    private void setLanguages() {
+        this.language1 = language1label.getText();
+        this.language2 = language2label.getText();
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -247,21 +373,31 @@ public class CategoryScreen extends javax.swing.JFrame {
         });
     }
 
+    private JSONObject jsonObj;
+    private String category;
+    private String language1;
+    private String language2;
+    private ArrayList<String> words1 = new ArrayList<String>();
+    private ArrayList<String> words2 = new ArrayList<String>();
+//    private String[] words1;
+//    private String[] words2;
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField enField1;
     private javax.swing.JTextField enField2;
     private javax.swing.JTextField enField3;
     private javax.swing.JTextField enField4;
     private javax.swing.JTextField enField5;
-    private javax.swing.JLabel english;
     private javax.swing.JLabel enterWords;
-    private javax.swing.JButton nextButt;
+    private javax.swing.JLabel language1label;
+    private javax.swing.JLabel language2label;
+    private javax.swing.JButton performExam;
     private javax.swing.JTextField polField1;
     private javax.swing.JTextField polField2;
     private javax.swing.JTextField polField3;
     private javax.swing.JTextField polField4;
     private javax.swing.JTextField polField5;
-    private javax.swing.JLabel polish;
     private javax.swing.JButton prevButt;
+    private javax.swing.JLabel wordsSetName;
     // End of variables declaration//GEN-END:variables
 }
