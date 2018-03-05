@@ -7,7 +7,6 @@ package dictionary;
 
 import java.io.*;
 import java.util.*;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -43,8 +42,8 @@ public class CategoryScreen extends javax.swing.JFrame {
     private void initComponents() {
 
         enterWords = new javax.swing.JLabel();
-        language1label = new javax.swing.JLabel();
         language2label = new javax.swing.JLabel();
+        language1label = new javax.swing.JLabel();
         enField1 = new javax.swing.JTextField();
         polField1 = new javax.swing.JTextField();
         enField2 = new javax.swing.JTextField();
@@ -66,9 +65,9 @@ public class CategoryScreen extends javax.swing.JFrame {
         enterWords.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         enterWords.setText("Enter words for set:");
 
-        language1label.setText("English");
+        language2label.setText("English");
 
-        language2label.setText("Polish");
+        language1label.setText("Polish");
 
         enField1.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
@@ -160,76 +159,72 @@ public class CategoryScreen extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(188, 188, 188)
+                        .addGap(276, 276, 276)
+                        .addComponent(enterWords))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(173, 173, 173)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(58, 58, 58)
+                                .addComponent(language1label))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(polField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(polField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(polField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(polField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(polField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(92, 92, 92)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(50, 50, 50)
-                                .addComponent(language1label)
-                                .addGap(178, 178, 178)
                                 .addComponent(language2label))
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(63, 63, 63)
-                                    .addComponent(polField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(enField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(63, 63, 63)
-                                        .addComponent(polField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(enField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(63, 63, 63)
-                                        .addComponent(polField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(enField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(63, 63, 63)
-                                        .addComponent(polField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(enField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(63, 63, 63)
-                                        .addComponent(polField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                    .addComponent(enField3, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(enField2, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(enField4, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(enField5, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(276, 276, 276)
-                        .addComponent(enterWords))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(wordsSetName, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(118, 118, 118)))
-                .addContainerGap(193, Short.MAX_VALUE))
+                        .addGap(309, 309, 309)
+                        .addComponent(wordsSetName, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(179, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(59, 59, 59)
                 .addComponent(enterWords)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(wordsSetName, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(language1label)
-                    .addComponent(language2label))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(polField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(polField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(polField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(polField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(enField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(polField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 139, Short.MAX_VALUE)
+                .addGap(22, 22, 22)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(language1label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(polField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(polField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(polField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(polField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(polField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(language2label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(enField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(enField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(enField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(enField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(enField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 137, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(prevButt)
                     .addComponent(performExam))
@@ -254,9 +249,6 @@ public class CategoryScreen extends javax.swing.JFrame {
     
     // TODO Make this json human readable
     private void writeToJsonFile() throws IOException {
-        System.out.println("Action performed");
-        
-        JSONArray cat = new JSONArray();
         
         JSONObject jsonInCat = new JSONObject();
         jsonInCat.put("language1", this.language1);
@@ -264,14 +256,12 @@ public class CategoryScreen extends javax.swing.JFrame {
         jsonInCat.put("words1", this.words1);
         jsonInCat.put("words2", this.words2);
         
-        cat.add(jsonInCat);
-        jsonObj.put(this.category, cat);
+        jsonObj.put(this.category, jsonInCat);
         
         try {
             FileWriter file = new FileWriter("wordsSet.json");
             file.write(jsonObj.toJSONString());
             file.flush();
-            System.out.println("JSON object: " + jsonObj);
         }
         catch(IOException e) { e.printStackTrace(); }
 
@@ -280,6 +270,11 @@ public class CategoryScreen extends javax.swing.JFrame {
     private void performExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_performExamActionPerformed
         try { writeToJsonFile(); }
         catch(IOException e) { e.printStackTrace(); }
+        
+        Exam examScreen = new Exam(this.category);
+        examScreen.setLocationRelativeTo(null);
+        examScreen.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_performExamActionPerformed
 
     private void prevButtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prevButtActionPerformed
@@ -293,43 +288,43 @@ public class CategoryScreen extends javax.swing.JFrame {
     // TODO make loop for buttons - in automatic way
     
     private void enField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField1FocusLost
-        words1.add(enField1.getText());
+        words2.add(enField1.getText());
     }//GEN-LAST:event_enField1FocusLost
 
     private void enField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField2FocusLost
-        words1.add(enField2.getText());
+        words2.add(enField2.getText());
     }//GEN-LAST:event_enField2FocusLost
 
     private void enField3FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField3FocusLost
-        words1.add(enField3.getText());
+        words2.add(enField3.getText());
     }//GEN-LAST:event_enField3FocusLost
 
     private void enField4FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField4FocusLost
-        words1.add(enField4.getText());
+        words2.add(enField4.getText());
     }//GEN-LAST:event_enField4FocusLost
 
     private void enField5FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_enField5FocusLost
-        words1.add(enField5.getText());
+        words2.add(enField5.getText());
     }//GEN-LAST:event_enField5FocusLost
 
     private void polField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField1FocusLost
-        words2.add(polField1.getText());
+        words1.add(polField1.getText());
     }//GEN-LAST:event_polField1FocusLost
 
     private void polField2FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField2FocusLost
-        words2.add(polField2.getText());
+        words1.add(polField2.getText());
     }//GEN-LAST:event_polField2FocusLost
 
     private void polField3FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField3FocusLost
-        words2.add(polField3.getText());
+        words1.add(polField3.getText());
     }//GEN-LAST:event_polField3FocusLost
 
     private void polField4FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField4FocusLost
-        words2.add(polField4.getText());
+        words1.add(polField4.getText());
     }//GEN-LAST:event_polField4FocusLost
 
     private void polField5FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_polField5FocusLost
-        words2.add(polField5.getText());
+        words1.add(polField5.getText());
     }//GEN-LAST:event_polField5FocusLost
 
     // TODO Make languages available to choose
@@ -379,8 +374,6 @@ public class CategoryScreen extends javax.swing.JFrame {
     private String language2;
     private ArrayList<String> words1 = new ArrayList<String>();
     private ArrayList<String> words2 = new ArrayList<String>();
-//    private String[] words1;
-//    private String[] words2;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField enField1;
