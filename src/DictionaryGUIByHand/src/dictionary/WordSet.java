@@ -10,8 +10,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.swing.*;
 import java.util.*;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 
 /**
@@ -23,6 +30,8 @@ public class WordSet extends JFrame{
     public WordSet(String wordSetNameStr) {
         this.wordSetName = wordSetNameStr;
         initComponents();
+        readJsonFile();
+        setLanguages();
     }
     
     private void initComponents() {
@@ -66,6 +75,7 @@ public class WordSet extends JFrame{
                 textFieldAction(evt);
             }
         });
+        words1.add("");
         
         TextField word2Init = new TextField(2, 0);
         word2Init.setFont(new Font("Dialog", 1, 14));
@@ -76,6 +86,7 @@ public class WordSet extends JFrame{
                 textFieldAction(evt);
             }
         });
+        words2.add("");
         
         words1Fields.add(word1Init);
         words2Fields.add(word2Init);
@@ -89,7 +100,6 @@ public class WordSet extends JFrame{
         addWordButt = new JButton("Add word");
         addWordButt.setFont(new Font("Dialog", 1, 14));
         addWordButt.setHorizontalAlignment(SwingConstants.CENTER);
-        
         addWordButt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -97,15 +107,31 @@ public class WordSet extends JFrame{
             }
         });
         
-        nextButt = new JButton("Next");
-        nextButt.setFont(new Font("Dialog", 1, 14));
-        nextButt.setHorizontalAlignment(SwingConstants.CENTER);
+        // nextButton
+        performExamButt = new JButton("Perform exam");
+        performExamButt.setFont(new Font("Dialog", 1, 14));
+        performExamButt.setHorizontalAlignment(SwingConstants.CENTER);
+        performExamButt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                performExamButtActionPerformed(evt);
+            }
+        });
+        
+        // prevButton
         prevButt = new JButton("Previous");
         prevButt.setFont(new Font("Dialog", 1, 14));
         prevButt.setHorizontalAlignment(SwingConstants.CENTER);
+        prevButt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                prevButtActionPerformed(evt);
+            }
+        });
+        
         lowerPanel.add(prevButt);
         lowerPanel.add(addWordButt);
-        lowerPanel.add(nextButt);
+        lowerPanel.add(performExamButt);
         
         // Layout
         this.setLayout(new BorderLayout());
@@ -119,11 +145,68 @@ public class WordSet extends JFrame{
         setSize(frameWidth, frameHeight);
     }
     
+    private void readJsonFile() {
+        JSONParser parser = new JSONParser();
+        
+        try {
+            Object obj = parser.parse(new FileReader("wordsSet.json"));
+            this.jsonObj = (JSONObject) obj;
+        }
+        catch(FileNotFoundException e) { e.printStackTrace(); }
+        catch(IOException e) { e.printStackTrace(); }
+        catch(ParseException e) { e.printStackTrace(); }
+        catch(Exception e) { e.printStackTrace(); }
+    }
+    
+    private void writeToJsonFile() throws IOException {
+        
+        JSONObject jsonInSet = new JSONObject();
+        jsonInSet.put("language1", this.language1);
+        jsonInSet.put("language2", this.language2);
+        jsonInSet.put("words1", this.words1);
+        jsonInSet.put("words2", this.words2);
+        
+        jsonObj.put(this.wordSetName, jsonInSet);
+        
+        try {
+            FileWriter file = new FileWriter("wordsSet.json");
+            file.write(jsonObj.toJSONString());
+            file.flush();
+        }
+        catch(IOException e) { e.printStackTrace(); }
+
+    }
+    
+    // TODO Make languages available to choose
+    private void setLanguages() {
+        this.language1 = this.lan1Lab.getText();
+        this.language2 = this.lan2Lab.getText();
+    }
+    
     private void textFieldAction(FocusEvent evt) {
-        System.out.println("Action!!");
-        TextField b = (TextField) evt.getSource();
-        //JOptionPane.showMessageDialog(b, "Button " + b.index);
-        System.out.println("Type: " + b.type + " Row: " + b.row);
+        TextField txtField = (TextField) evt.getSource();
+        System.out.println("Type: " + txtField.type + " Row: " + txtField.row);
+        if (txtField.type == 1) this.words1.set(txtField.row, txtField.getText());
+        else if (txtField.type == 2) this.words2.set(txtField.row, txtField.getText());
+        System.out.println(this.words1);
+        System.out.println(this.words2);
+    }
+    
+    private void performExamButtActionPerformed(ActionEvent evt) {
+        try { writeToJsonFile(); }
+        catch(IOException e) { e.printStackTrace(); }
+        
+        Exam examScreen = new Exam(this.wordSetName);
+        examScreen.setLocationRelativeTo(null);
+        examScreen.setVisible(true);
+        this.dispose();
+    }
+    
+    private void prevButtActionPerformed(ActionEvent evt) {
+        Main mainScreen = new Main();
+        mainScreen.setLocationRelativeTo(null);
+        mainScreen.setVisible(true);
+        this.dispose();
     }
     
     private void addWordButtActionPerformed(ActionEvent evt) {
@@ -143,6 +226,7 @@ public class WordSet extends JFrame{
                 textFieldAction(evt);
             }
         });
+        words1.add("");
         
         word2.setFont(new Font("Dialog", 1, 14));
         word2.setBounds(450, this.position, 150, 30);
@@ -152,6 +236,7 @@ public class WordSet extends JFrame{
                 textFieldAction(evt);
             }
         });
+        words2.add("");
         
         words1Fields.add(word1);
         words2Fields.add(word2);
@@ -196,8 +281,8 @@ public class WordSet extends JFrame{
     
     private class TextField extends JTextField {
         
-        int type; // 1 - word1, 2 - word 2
-        int row; // number of row
+        int type; // 1 - word1, 2 - word2
+        int row;  // number of row
     
         TextField(int type, int row) {
         
@@ -223,10 +308,16 @@ public class WordSet extends JFrame{
     private JLabel lan2Lab;
     
     private JButton addWordButt;
-    private JButton nextButt;
+    private JButton performExamButt;
     private JButton prevButt;
     
     private ArrayList<TextField> words1Fields = new ArrayList<TextField>();
     private ArrayList<TextField> words2Fields = new ArrayList<TextField>();
+    private ArrayList<String> words1 = new ArrayList<String>();
+    private ArrayList<String> words2 = new ArrayList<String>();
+    
+    private JSONObject jsonObj;
+    private String language1;
+    private String language2;
     
 }
