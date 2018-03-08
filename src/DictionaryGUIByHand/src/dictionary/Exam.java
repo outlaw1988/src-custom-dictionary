@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +31,8 @@ public class Exam extends JFrame {
         this.wordSetName = wordSetNameStr;
         initComponents();
         readJsonFile();
-        getWordsLists();
+        //getWordsLists();
+        getWordsListsFromDatabase();
         createShuffledIndList();
         performExam();
         
@@ -144,6 +146,22 @@ public class Exam extends JFrame {
         
     }
     
+    private void getWordsListsFromDatabase() {
+        
+        this.database = new DataBase();
+        
+        try {
+            this.database.getDataFromWords(this.wordSetName);
+        }
+        catch(SQLException e) { System.out.println(e.getMessage()); }
+        
+        this.wordsToTranslate = this.database.getWords1();
+        this.answers = this.database.getWords2();
+        
+        System.out.println(this.wordsToTranslate);
+        System.out.println(this.answers);
+    }
+    
     private void createShuffledIndList() {
     
         int len = this.wordsToTranslate.size();
@@ -195,7 +213,7 @@ public class Exam extends JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Exam("Test").setVisible(true);
+                new Exam("family").setVisible(true);
             }
         });
     }
@@ -209,12 +227,14 @@ public class Exam extends JFrame {
     private JButton nextButt;
     
     private JSONObject jsonObj;
-    private ArrayList<String> wordsToTranslate;
-    private ArrayList<String> answers;
+    private ArrayList<String> wordsToTranslate; //= new ArrayList<String>();
+    private ArrayList<String> answers; //= new ArrayList<String>();
     private List<Integer> shuffledInd = new ArrayList<>();
     private int questionNum = -1;
     private int corrNum = 0;
     private String currAnswer;
     private String rightAnswer;
+    
+    private DataBase database;
     
 }

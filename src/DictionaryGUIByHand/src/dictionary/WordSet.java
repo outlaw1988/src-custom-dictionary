@@ -177,6 +177,19 @@ public class WordSet extends JFrame{
 
     }
     
+    private void insertToDatabase() {
+    
+        this.database = new DataBase();
+        this.database.insertToSetup(this.wordSetName, this.language1, 
+                                    this.language2);
+        
+        for (int i = 0; i < this.words1.size(); i++) {
+            this.database.insertToWord(this.wordSetName, this.words1.get(i), 
+                                       this.words2.get(i));
+        }
+        
+    }
+    
     // TODO Make languages available to choose
     private void setLanguages() {
         this.language1 = this.lan1Lab.getText();
@@ -195,6 +208,8 @@ public class WordSet extends JFrame{
     private void performExamButtActionPerformed(ActionEvent evt) {
         try { writeToJsonFile(); }
         catch(IOException e) { e.printStackTrace(); }
+        
+        insertToDatabase();
         
         Exam examScreen = new Exam(this.wordSetName);
         examScreen.setLocationRelativeTo(null);
@@ -319,5 +334,7 @@ public class WordSet extends JFrame{
     private JSONObject jsonObj;
     private String language1;
     private String language2;
+    
+    private DataBase database;
     
 }
