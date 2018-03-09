@@ -56,10 +56,10 @@ public class WordSet extends JFrame{
         wordsPanel = new JPanel();
         wordsPanel.setLayout(null);
         // Language labels
-        lan1Lab = new JLabel("Polish");
+        lan1Lab = new JLabel("English");
         lan1Lab.setFont(new Font("Dialog", 1, 14));
         lan1Lab.setBounds(200, 30, 100, 20);
-        lan2Lab = new JLabel("English");
+        lan2Lab = new JLabel("Polish");
         lan2Lab.setFont(new Font("Dialog", 1, 14));
         lan2Lab.setBounds(500, 30, 100, 20);
         wordsPanel.add(lan1Lab);

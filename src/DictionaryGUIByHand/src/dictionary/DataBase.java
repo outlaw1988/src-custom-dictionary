@@ -25,8 +25,8 @@ public class DataBase {
                 + " setName text NOT NULL,\n"
                 + " language1 text NOT NULL,\n"
                 + " language2 text NOT NULL,\n"
-                + " lastResult integer,\n"
-                + " bestResult integer\n"
+                + " lastResult integer NOT NULL,\n"
+                + " bestResult integer NOT NULL\n"
                 + ");";
         
         String sql2 = "CREATE TABLE IF NOT EXISTS words (\n"

@@ -30,7 +30,7 @@ public class Exam extends JFrame {
     
         this.wordSetName = wordSetNameStr;
         initComponents();
-        readJsonFile();
+        //readJsonFile();
         //getWordsLists();
         getWordsListsFromDatabase();
         createShuffledIndList();
@@ -142,8 +142,8 @@ public class Exam extends JFrame {
     private void getWordsLists() {
         
         JSONObject categoryObj = (JSONObject)this.jsonObj.get(this.wordSetName);
-        this.wordsToTranslate = (ArrayList<String>)categoryObj.get("words1");
-        this.answers = (ArrayList<String>)categoryObj.get("words2");
+        this.wordsToTranslate = (ArrayList<String>)categoryObj.get("words2");
+        this.answers = (ArrayList<String>)categoryObj.get("words1");
         
     }
     
@@ -156,8 +156,8 @@ public class Exam extends JFrame {
         }
         catch(SQLException e) { System.out.println(e.getMessage()); }
         
-        this.wordsToTranslate = this.database.getWords1();
-        this.answers = this.database.getWords2();
+        this.wordsToTranslate = this.database.getWords2();
+        this.answers = this.database.getWords1();
         
         System.out.println(this.wordsToTranslate);
         System.out.println(this.answers);
