@@ -119,6 +119,7 @@ public class Exam extends JFrame {
         else {
             System.out.println("Your score is: " + this.corrNum);
             int percentCorr = (int)(((float)this.corrNum / (float)this.wordsToTranslate.size()) * 100.0);
+            this.database.updateResult(percentCorr, wordSetName);
             JOptionPane.showMessageDialog(this, "Your score is: " + percentCorr + " %");
         }
     }

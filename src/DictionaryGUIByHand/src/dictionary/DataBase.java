@@ -24,7 +24,9 @@ public class DataBase {
                 + " id integer PRIMARY KEY,\n"
                 + " setName text NOT NULL,\n"
                 + " language1 text NOT NULL,\n"
-                + " language2 text NOT NULL\n"
+                + " language2 text NOT NULL,\n"
+                + " lastResult integer,\n"
+                + " bestResult integer\n"
                 + ");";
         
         String sql2 = "CREATE TABLE IF NOT EXISTS words (\n"
@@ -59,14 +61,78 @@ public class DataBase {
     }
     
     public void insertToSetup(String setName, String language1, String language2) {
-        String sql = "INSERT INTO setup(setName,language1,language2) VALUES(?,?,?)";
+        String sql = "INSERT INTO setup(setName,language1,language2,"
+                + "lastResult,bestResult) VALUES(?,?,?,?,?)";
  
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, setName);
             pstmt.setString(2, language1);
             pstmt.setString(3, language2);
+            // add zeros as result in initialization
+            pstmt.setInt(4, 0);
+            pstmt.setInt(5, 0);
             pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public void updateResult(int result, String setName) {
+    
+        String sql = String.format("UPDATE setup SET lastResult = %d WHERE "
+                + "setName = \'%s\'", result, setName);
+ 
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        String sqlGetBestResult = String.format("SELECT bestResult FROM setup "
+                + "WHERE setName = \'%s\'", setName);
+        
+        int bestResult = 0;
+        
+        try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlGetBestResult)) {
+            
+            while (rs.next()) {
+                bestResult = rs.getInt("bestResult");
+            }
+            
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        if (result > bestResult) {
+        
+            bestResult = result;
+            String sqlUpdateBestResult = String.format("UPDATE setup SET bestResult = %d WHERE "
+                + "setName = \'%s\'", bestResult, setName);
+            
+            try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sqlUpdateBestResult)) {
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println(e.getMessage());
+        }
+        
+        }
+            
+            
+        
+    }
+    
+    public void getDataFromSetup() {
+        String sql = "SELECT id, setName, language1, language2 FROM setup";
+
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -86,24 +152,7 @@ public class DataBase {
         }
     }
     
-    public void getDataFromSetup() {
-        String sql = "SELECT id, setName, language1, language2 FROM setup";
-        
-        try (Connection conn = this.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-            
-            // loop through the result set
-            while (rs.next()) {
-                System.out.println(rs.getInt("id") +  "\t" + 
-                                   rs.getString("setName") + "\t" +
-                                   rs.getString("language1") + "\t" +
-                                   rs.getString("language2"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
+
     
     public void getDataFromWords(String setName) throws SQLException {
         String sql = String.format("SELECT id, setName, word1, word2 FROM words "
@@ -113,19 +162,32 @@ public class DataBase {
             Statement stmt = conn.createStatement();
             ResultSet rset = stmt.executeQuery(sql)) {
             
-            //this.rs = rset;
-            // loop through the result set
-//            while (this.rs.next()) {
-//                System.out.println(this.rs.getInt("id") +  "\t" + 
-//                                   this.rs.getString("setName") + "\t" +
-//                                   this.rs.getString("word1") + "\t" +
-//                                   this.rs.getString("word2"));
-//            }
             while (rset.next()) {
                 words1.add(rset.getString("word1"));
                 words2.add(rset.getString("word2"));
             }
    
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+    }
+    
+    public void removeRecords(String setName) {
+    
+        String sql1 = String.format("DELETE from setup WHERE setName = \'%s\'", setName);
+        String sql2 = String.format("DELETE from words WHERE setName = \'%s\'", setName);
+
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql1)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql2)) {
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -142,8 +204,8 @@ public class DataBase {
     
     public static void main(String[] args) {
         
-        //createNewTable();
         DataBase db = new DataBase();
+        createNewTable();
 //        db.insertToSetup("animals", "Polish", "English");
 //        db.insertToWord("animals", "pies", "dog");
         //db.getData();

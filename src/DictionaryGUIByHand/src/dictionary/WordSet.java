@@ -180,6 +180,9 @@ public class WordSet extends JFrame{
     private void insertToDatabase() {
     
         this.database = new DataBase();
+        // removing old records if exist
+        this.database.removeRecords(this.wordSetName);
+        // inserting new records
         this.database.insertToSetup(this.wordSetName, this.language1, 
                                     this.language2);
         
@@ -206,8 +209,8 @@ public class WordSet extends JFrame{
     }
     
     private void performExamButtActionPerformed(ActionEvent evt) {
-        try { writeToJsonFile(); }
-        catch(IOException e) { e.printStackTrace(); }
+//        try { writeToJsonFile(); }
+//        catch(IOException e) { e.printStackTrace(); }
         
         insertToDatabase();
         
@@ -289,7 +292,7 @@ public class WordSet extends JFrame{
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new WordSet("Test").setVisible(true);
+                new WordSet("instruments").setVisible(true);
             }
         });
     }
