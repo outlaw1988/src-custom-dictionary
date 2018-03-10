@@ -10,15 +10,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+//import java.io.FileNotFoundException;
+//import java.io.FileReader;
+//import java.io.FileWriter;
+//import java.io.IOException;
 import javax.swing.*;
 import java.util.*;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+//import org.json.simple.parser.JSONParser;
+//import org.json.simple.parser.ParseException;
 
 
 /**
@@ -30,7 +30,6 @@ public class WordSet extends JFrame{
     public WordSet(String wordSetNameStr) {
         this.wordSetName = wordSetNameStr;
         initComponents();
-        readJsonFile();
         setLanguages();
     }
     
@@ -145,37 +144,37 @@ public class WordSet extends JFrame{
         setSize(frameWidth, frameHeight);
     }
     
-    private void readJsonFile() {
-        JSONParser parser = new JSONParser();
-        
-        try {
-            Object obj = parser.parse(new FileReader("wordsSet.json"));
-            this.jsonObj = (JSONObject) obj;
-        }
-        catch(FileNotFoundException e) { e.printStackTrace(); }
-        catch(IOException e) { e.printStackTrace(); }
-        catch(ParseException e) { e.printStackTrace(); }
-        catch(Exception e) { e.printStackTrace(); }
-    }
-    
-    private void writeToJsonFile() throws IOException {
-        
-        JSONObject jsonInSet = new JSONObject();
-        jsonInSet.put("language1", this.language1);
-        jsonInSet.put("language2", this.language2);
-        jsonInSet.put("words1", this.words1);
-        jsonInSet.put("words2", this.words2);
-        
-        jsonObj.put(this.wordSetName, jsonInSet);
-        
-        try {
-            FileWriter file = new FileWriter("wordsSet.json");
-            file.write(jsonObj.toJSONString());
-            file.flush();
-        }
-        catch(IOException e) { e.printStackTrace(); }
-
-    }
+//    private void readJsonFile() {
+//        JSONParser parser = new JSONParser();
+//        
+//        try {
+//            Object obj = parser.parse(new FileReader("wordsSet.json"));
+//            this.jsonObj = (JSONObject) obj;
+//        }
+//        catch(FileNotFoundException e) { e.printStackTrace(); }
+//        catch(IOException e) { e.printStackTrace(); }
+//        catch(ParseException e) { e.printStackTrace(); }
+//        catch(Exception e) { e.printStackTrace(); }
+//    }
+//    
+//    private void writeToJsonFile() throws IOException {
+//        
+//        JSONObject jsonInSet = new JSONObject();
+//        jsonInSet.put("language1", this.language1);
+//        jsonInSet.put("language2", this.language2);
+//        jsonInSet.put("words1", this.words1);
+//        jsonInSet.put("words2", this.words2);
+//        
+//        jsonObj.put(this.wordSetName, jsonInSet);
+//        
+//        try {
+//            FileWriter file = new FileWriter("wordsSet.json");
+//            file.write(jsonObj.toJSONString());
+//            file.flush();
+//        }
+//        catch(IOException e) { e.printStackTrace(); }
+//
+//    }
     
     private void insertToDatabase() {
     
