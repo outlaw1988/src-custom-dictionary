@@ -17,25 +17,25 @@ public class DataBase {
     public static void createNewTable() {
     
         // Connection string
-        String url = "jdbc:sqlite:sqlite/database.db";
+        String url = "jdbc:sqlite:sqlite/database2.db";
         
         // SQL statements
         String sql = "CREATE TABLE IF NOT EXISTS setup (\n"
                 + " id integer PRIMARY KEY,\n"
                 + " category text NOT NULL,\n"
-                + " setName text NOT NULL,\n"
-                + " language1 text NOT NULL,\n"
-                + " language2 text NOT NULL,\n"
-                + " lastResult integer NOT NULL,\n"
-                + " bestResult integer NOT NULL\n"
+                + " setName text,\n"
+                + " language1 text,\n"
+                + " language2 text,\n"
+                + " lastResult integer,\n"
+                + " bestResult integer\n"
                 + ");";
         
         String sql2 = "CREATE TABLE IF NOT EXISTS words (\n"
                 + " id integer PRIMARY KEY,\n"
                 + " category text NOT NULL,\n"
-                + " setName text NOT NULL,\n"
-                + " word1 text NOT NULL,\n"
-                + " word2 text NOT NULL\n"
+                + " setName text,\n"
+                + " word1 text,\n"
+                + " word2 text\n"
                 + ");";
         
         try (Connection conn = DriverManager.getConnection(url); 
@@ -52,7 +52,7 @@ public class DataBase {
     
     private Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:sqlite/database.db";
+        String url = "jdbc:sqlite:sqlite/database2.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
