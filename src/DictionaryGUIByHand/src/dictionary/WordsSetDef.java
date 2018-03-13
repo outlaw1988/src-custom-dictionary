@@ -25,9 +25,9 @@ import org.json.simple.JSONObject;
  *
  * @author jakub
  */
-public class WordSet extends JFrame{
+public class WordsSetDef extends JFrame{
     
-    public WordSet(String wordSetNameStr) {
+    public WordsSetDef(String wordSetNameStr) {
         this.wordSetName = wordSetNameStr;
         initComponents();
         setLanguages();
@@ -182,13 +182,13 @@ public class WordSet extends JFrame{
         // removing old records if exist
         this.database.removeRecords(this.wordSetName);
         // inserting new records
-        this.database.insertToSetup(this.wordSetName, this.language1, 
-                                    this.language2);
-        
-        for (int i = 0; i < this.words1.size(); i++) {
-            this.database.insertToWord(this.wordSetName, this.words1.get(i), 
-                                       this.words2.get(i));
-        }
+//        this.database.insertToSetup(this.wordSetName, this.language1, 
+//                                    this.language2);
+//        
+//        for (int i = 0; i < this.words1.size(); i++) {
+//            this.database.insertToWord(this.wordSetName, this.words1.get(i), 
+//                                       this.words2.get(i));
+//        }
         
     }
     
@@ -278,20 +278,23 @@ public class WordSet extends JFrame{
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(WordSet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WordsSetDef.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(WordSet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WordsSetDef.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(WordSet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WordsSetDef.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(WordSet.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(WordsSetDef.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new WordSet("instruments").setVisible(true);
+                new WordsSetDef("instruments").setVisible(true);
             }
         });
     }

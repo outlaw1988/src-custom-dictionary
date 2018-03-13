@@ -187,6 +187,27 @@ public class DataBase {
         
     }
     
+    public int countRecords(String sqlCommand) {
+    
+        int counter = 0;
+        
+        try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlCommand)){
+
+            rs.next();
+            counter = rs.getInt("rowcount");
+            rs.close();
+            //System.out.println("MyTable has " + counter + " row(s).");
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        return counter;
+
+    }
+    
     public ArrayList<String> getWords1() {
         return this.words1;
     }

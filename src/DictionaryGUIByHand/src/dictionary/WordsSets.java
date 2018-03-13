@@ -5,8 +5,15 @@
  */
 package dictionary;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -14,17 +21,25 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 /**
  *
  * @author jakub
  */
-public class Main extends JFrame {
+public class WordsSets extends JFrame {
     
-    public Main() {
-        this.getDataFromDatabase();
+    public WordsSets(String categoryName) {
+        this.categoryName = categoryName;
         this.initComponents();
     }
     
@@ -36,43 +51,54 @@ public class Main extends JFrame {
         // Upper panel
         this.upperPanel = new JPanel();
         this.upperPanel.setLayout(new GridLayout(1, 1));
-        this.catIntroLab = new JLabel("Categories");
-        this.catIntroLab.setFont(new Font("Dialog", 1, 18));
-        this.catIntroLab.setHorizontalAlignment(SwingConstants.CENTER);
-        this.upperPanel.add(this.catIntroLab);
+        this.wordsSetIntroLab = new JLabel("Sets of words for category: " + this.categoryName);
+        this.wordsSetIntroLab.setFont(new Font("Dialog", 1, 18));
+        this.wordsSetIntroLab.setHorizontalAlignment(SwingConstants.CENTER);
+        this.upperPanel.add(this.wordsSetIntroLab);
         
         // Center panel
-        this.categoryPanel = new JPanel();
-        this.categoryPanel.setLayout(new GridBagLayout());
+        this.wordsSetsPanel = new JPanel();
+        this.wordsSetsPanel.setLayout(new GridBagLayout());
         
         this.drawBoxes();
         
-        this.centerScrollPanel = new JScrollPane(this.categoryPanel, 
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+        this.centerScrollPanel = new JScrollPane(this.wordsSetsPanel, 
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         // increase speed of scrolling
         this.centerScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
-
+        
         // Lower panel
         this.lowerPanel = new JPanel();
         this.lowerPanel.setLayout(null);
         this.lowerPanel.setPreferredSize(new Dimension(770, 30));
         
-        this.addCatButt = new JButton("Add new category");
-        this.addCatButt.setFont(new Font("Dialog", 1, 14));
-        this.addCatButt.setBounds(frameWidth/2 - 100, 0, 200, 30);
-        this.addCatButt.addActionListener(new ActionListener() {
+        this.addSetButt = new JButton("Add new set");
+        this.addSetButt.setFont(new Font("Dialog", 1, 14));
+        this.addSetButt.setBounds(frameWidth/2 - 80, 0, 160, 30);
+        this.addSetButt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                addActionListenerActionPerformed(evt);
+                addSetButtActionPerformed(evt);
             }
         });
-        this.lowerPanel.add(addCatButt);
+        this.lowerPanel.add(addSetButt);
         
+        this.goBackButt = new JButton("Go back");
+        this.goBackButt.setFont(new Font("Dialog", 1, 14));
+        this.goBackButt.setBounds(10, 0, 100, 30);
+        this.goBackButt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                 goBackButtActionPerformed(e);
+            }
+        });
+        this.lowerPanel.add(this.goBackButt);
+
         // Layout
         this.setLayout(new BorderLayout());
         this.add(this.upperPanel, BorderLayout.PAGE_START);
-        this.add(this.centerScrollPanel, BorderLayout.CENTER);
+//        this.add(this.centerScrollPanel, BorderLayout.CENTER);
         this.add(lowerPanel, BorderLayout.PAGE_END);
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -83,8 +109,8 @@ public class Main extends JFrame {
     
     private void drawBoxes() {
     
-        this.categoryPanel.removeAll();
-        this.boxes = new ArrayList<>();
+        this.wordsSetsPanel.removeAll();
+        this.setBoxes = new ArrayList<>();
         
         int gridy = 0;
         int boxInRow = 3;
@@ -97,7 +123,7 @@ public class Main extends JFrame {
             if ((i % boxInRow) == 0) gc.gridy = gridy++;
             
             String category = (String)this.organizedData.get(i).get("category");
-            Box box = new Box(category);
+            SetBox box = new SetBox(category);
             box.setLayout(null);
             
             box.addMouseListener(new MouseAdapter() {
@@ -172,130 +198,25 @@ public class Main extends JFrame {
                 box.add(lanLabel);
             }
             
-            this.boxes.add(box);
+            this.setBoxes.add(box);
             this.categoryPanel.add(box, gc);
         }
         
         this.categoryPanel.revalidate();
         this.categoryPanel.repaint();
-    
-    }
-    
-    private void getDataFromDatabase() {
-    
-        this.database = new DataBase();
-        String sqlCommand = "SELECT * FROM setup";
-        this.setupData = this.database.getData(sqlCommand);
-        //sqlCommand = "SELECT * FROM words";
-        //this.wordsData = this.database.getData(sqlCommand);
-        this.createOrganizedData();
         
     }
     
-    private void createOrganizedData() {
+    private void addSetButtActionPerformed(ActionEvent evt) {
     
-        this.organizedData = new ArrayList<>();
-        Map<String, Object> row;
-        this.presCategories = new ArrayList<>();
-        
-        for (int i = 0; i < this.setupData.size(); i++) {
-            row = new HashMap<>();
-            String category = (String)this.setupData.get(i).get("category");
-            
-            if (this.presCategories.contains(category)) continue;
-            else this.presCategories.add(category);
-            
-            row.put("category", category);
-//            // TODO Create method in DataBase to count items
-//            row.put("setsNum", getNum(category, this.setupData));
-//            // TODO avoid loading whole wordsData from database
-//            row.put("wordsNum", getNum(category, this.wordsData));
-
-            String sqlCommSetsNum = String.format("SELECT COUNT(*) AS rowcount FROM setup "
-                    + "WHERE category = \'%s\' AND setName IS NOT NULL", category);
-            row.put("setsNum", this.database.countRecords(sqlCommSetsNum));
-            
-            String sqlCommWordsNum = String.format("SELECT COUNT(*) AS rowcount FROM words "
-                    + "WHERE category = \'%s\' AND setName IS NOT NULL", category);
-            row.put("wordsNum", this.database.countRecords(sqlCommWordsNum));
-
-            row.put("language1", (String)this.setupData.get(i).get("language1"));
-            row.put("language2", (String)this.setupData.get(i).get("language2"));
-            this.organizedData.add(row);
-        }
     }
     
-//    private int getNum(String categoryName, 
-//                       java.util.List<Map<String, Object>> data) {
-//    
-//        int counter = 0;
-//        
-//        for (Map<String, Object> dataItem : data) {
-//            String category = (String)dataItem.get("category");
-//            String setName = (String)dataItem.get("setName");
-//            if (category.equals(categoryName) && setName != null) counter++;
-//        }
-//        
-//        return counter;
-//    }
-    
-    private void boxClicked(MouseEvent me) {
-    
-        String categoryClicked = ((Box)(me.getSource())).categoryId;
+    private void goBackButtActionPerformed(ActionEvent evt) {
         
-        // TODO place to show new screen
-        //System.out.println("Box clicked for category: " + categoryClicked);
-        
-        WordsSets wordsSetsScreen = new WordsSets(categoryClicked);
-        wordsSetsScreen.setLocationRelativeTo(this);
+        Main catScreen = new Main();
+        catScreen.setLocationRelativeTo(this);
         this.dispose();
-        wordsSetsScreen.setVisible(true);
-        
-    }
-    
-    private void removeIconClicked(ActionEvent evt) {
-        
-        String categoryClicked = ((Box)((JButton)evt.getSource()).getParent()).categoryId;
-        
-        String message = "Are you sure you want to remove category " + categoryClicked + 
-                         " ?";
-        
-        int dialogResult = JOptionPane.showConfirmDialog(this, 
-                message, "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-        
-        if(dialogResult == JOptionPane.YES_OPTION){
-            
-            String sqlCommand = String.format("DELETE from setup WHERE category "
-                                            + "= \'%s\'", categoryClicked);
-            this.database.removeRecords(sqlCommand);
-            
-            sqlCommand = String.format("DELETE from words WHERE category "
-                                            + "= \'%s\'", categoryClicked);
-            this.database.removeRecords(sqlCommand);
-            
-            this.getDataFromDatabase();
-            this.drawBoxes();
-        }
-    }
-    
-    private void addActionListenerActionPerformed(ActionEvent evt) {
-        
-        String message = "Please, enter category name:";
-        String categoryName = JOptionPane.showInputDialog(this, message);
-        
-        if (categoryName != null) {
-            
-            if (this.presCategories.contains(categoryName)) {
-                message = "Category " + categoryName + " already exists!";
-                JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                this.database.insertToSetup(categoryName, null, null, null);
-                this.getDataFromDatabase();
-                this.drawBoxes();
-            }
-
-        }
+        catScreen.setVisible(true);
         
     }
     
@@ -320,21 +241,21 @@ public class Main extends JFrame {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                Main gui = new Main();
-                gui.setLocationRelativeTo(null);
-                gui.setVisible(true);
+                WordsSets wordsSetsScreen = new WordsSets("Test");
+                wordsSetsScreen.setLocationRelativeTo(null);
+                wordsSetsScreen.setVisible(true);
             }
         });
     }
     
-    private class Box extends JPanel {
+    private class SetBox extends JPanel {
     
-        public Box(String category) {
+        public SetBox(String setName) {
             super();
-            this.categoryId = category;
+            this.setName = setName;
         }
         
-        String categoryId;
+        String setName;
 //        int setsNum;
 //        int wordsNum;
 //        String language1;
@@ -342,21 +263,16 @@ public class Main extends JFrame {
         
     }
     
-    private DataBase database;
-    java.util.List<Map<String, Object>> setupData;
-    //java.util.List<Map<String, Object>> wordsData;
-    java.util.List<Map<String, Object>> organizedData;
-    
-    // For purpose when category is duplicated in database (few sets)
-    ArrayList<String> presCategories;
+    String categoryName;
+    private ArrayList<Box> setBoxes;
     
     private JPanel upperPanel;
-    private JScrollPane centerScrollPanel;
-    private JPanel categoryPanel;
+    private JPanel wordsSetsPanel;
     private JPanel lowerPanel;
+    private JScrollPane centerScrollPanel;
     
-    private JLabel catIntroLab;
-    private ArrayList<Box> boxes;
-    private JButton addCatButt;
+    private JLabel wordsSetIntroLab;
+    private JButton addSetButt;
+    private JButton goBackButt;
     
 }
