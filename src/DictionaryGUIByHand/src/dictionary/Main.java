@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -51,22 +53,6 @@ public class Main extends JFrame {
         // increase speed of scrolling
         this.centerScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
 
-        // int boxesNum = 30;
-        // TODO Change, now it's for testing purposes
-//        for(int i = 0; i < boxesNum; i++) {
-//            GridBagConstraints gc = new GridBagConstraints();
-//            gc.anchor = GridBagConstraints.LAST_LINE_END;
-//            gc.insets = new Insets(10, 10, 10, 10);
-//            gc.gridx = i % boxInRow;
-//            if ((i % boxInRow) == 0) gc.gridy = ++gridy;
-//            JPanel box = new JPanel();
-//            box.setPreferredSize(new Dimension(200, 100));
-//            box.setBorder(BorderFactory.createLineBorder(Color.black));
-//            JLabel boxLabel = new JLabel("Box test message " + i);
-//            box.add(boxLabel);
-//            categoryPanel.add(box, gc);
-//        }
-
         // Lower panel
         this.lowerPanel = new JPanel();
         this.lowerPanel.setLayout(new GridLayout(1, 1));
@@ -104,27 +90,47 @@ public class Main extends JFrame {
         for (int i = 0; i < this.organizedData.size(); i++) {
 
             GridBagConstraints gc = new GridBagConstraints();
-            //gc.anchor = GridBagConstraints.LAST_LINE_END;
             gc.insets = new Insets(10, 10, 10, 10);
             gc.gridx = i % boxInRow;
             if ((i % boxInRow) == 0) gc.gridy = gridy++;
             
             String category = (String)this.organizedData.get(i).get("category");
             Box box = new Box(category);
-            box.setLayout(new GridLayout(0, 1));
+            box.setLayout(null);
+            
+            box.addMouseListener(new MouseAdapter() {
+                
+                public void mouseEntered(MouseEvent me) {
+                    Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
+                    setCursor(handCursor);
+                 }
+                 public void mouseExited(MouseEvent me) {
+                    Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+                    setCursor(defaultCursor);
+                 }
+                
+                public void mouseClicked(MouseEvent me) {
+                    boxClicked(me);
+                }
+            });
             
             box.setPreferredSize(new Dimension(200, 100));
             box.setBorder(BorderFactory.createLineBorder(Color.black));
             JLabel boxLabel = new JLabel(category);
             boxLabel.setFont(new Font("Dialog", Font.BOLD, 16));
+            boxLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            boxLabel.setBounds(0, 2, 200, 20);
+            box.add(boxLabel);
             
-            JLabel setsNumDescrLab = new JLabel("Sets number:");
-            JLabel setsNum = new JLabel(this.organizedData.get(i).get("setsNum")
-                    .toString());
+            JLabel setsNumDescrLab = new JLabel("Sets number: " + this.organizedData.get(i).get("setsNum").toString());
+            setsNumDescrLab.setHorizontalAlignment(SwingConstants.LEFT);
+            setsNumDescrLab.setBounds(100 - 90, 30, 100, 15);
+            box.add(setsNumDescrLab);
             
-            JLabel wordsNumDescrLab = new JLabel("Words number:");
-            JLabel wordsNum = new JLabel(this.organizedData.get(i).get("wordsNum")
-                    .toString());
+            JLabel wordsNumDescrLab = new JLabel("Words number: " + this.organizedData.get(i).get("wordsNum").toString());
+            wordsNumDescrLab.setHorizontalAlignment(SwingConstants.LEFT);
+            wordsNumDescrLab.setBounds(100 - 90, 50, 120, 15);
+            box.add(wordsNumDescrLab);
             
             BufferedImage img = null;
             
@@ -136,14 +142,33 @@ public class Main extends JFrame {
 
 //            Image dimg = img.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
             ImageIcon imageIcon = new ImageIcon(img);
-            JLabel removeIcon = new JLabel(imageIcon);
+            //JLabel removeIcon = new JLabel(imageIcon);
+            JButton removeIcon = new JButton(imageIcon);
+            removeIcon.setBounds(150, 30, 30, 30);
+            removeIcon.setToolTipText("Remove category");
+
+            removeIcon.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    removeIconClicked(e);
+                }
+            });
             
-            box.add(boxLabel);
-            box.add(setsNumDescrLab);
-            box.add(setsNum);
-            box.add(wordsNumDescrLab);
-            box.add(wordsNum);
             box.add(removeIcon);
+            
+            // Languages
+            if (this.organizedData.get(i).get("language1") != null) {
+            
+                JLabel lanLabel = new JLabel(this.organizedData.get(i).
+                                            get("language1").toString() + 
+                                            " <-> " + this.organizedData.get(i).
+                                            get("language2").toString()
+                                            );
+                
+                lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                lanLabel.setBounds(0, 80, 200, 15);
+                box.add(lanLabel);
+            }
             
             this.boxes.add(box);
             this.categoryPanel.add(box, gc);
@@ -169,15 +194,14 @@ public class Main extends JFrame {
     
         this.organizedData = new ArrayList<>();
         Map<String, Object> row;
-        // For purpose when category is duplicated in database (few sets)
-        ArrayList<String> presCategories = new ArrayList<>();
+        this.presCategories = new ArrayList<>();
         
         for (int i = 0; i < this.setupData.size(); i++) {
             row = new HashMap<>();
             String category = (String)this.setupData.get(i).get("category");
             
-            if (presCategories.contains(category)) continue;
-            else presCategories.add(category);
+            if (this.presCategories.contains(category)) continue;
+            else this.presCategories.add(category);
             
             row.put("category", category);
             row.put("setsNum", getNum(category, this.setupData));
@@ -202,15 +226,57 @@ public class Main extends JFrame {
         return counter;
     }
     
+    private void boxClicked(MouseEvent me) {
+    
+        String categoryClicked = ((Box)(me.getSource())).categoryId;
+        
+        // TODO place to show new screen
+        //System.out.println("Box clicked for category: " + categoryClicked);
+        
+    }
+    
+    private void removeIconClicked(ActionEvent evt) {
+        
+        String categoryClicked = ((Box)((JButton)evt.getSource()).getParent()).categoryId;
+        
+        String message = "Are you sure you want to remove category " + categoryClicked + 
+                         " ?";
+        
+        int dialogResult = JOptionPane.showConfirmDialog(this, 
+                message, "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        
+        if(dialogResult == JOptionPane.YES_OPTION){
+            
+            String sqlCommand = String.format("DELETE from setup WHERE category "
+                                            + "= \'%s\'", categoryClicked);
+            this.database.removeRecords(sqlCommand);
+            
+            sqlCommand = String.format("DELETE from words WHERE category "
+                                            + "= \'%s\'", categoryClicked);
+            this.database.removeRecords(sqlCommand);
+            
+            this.getDataFromDatabase();
+            this.drawBoxes();
+        }
+    }
+    
     private void addActionListenerActionPerformed(ActionEvent evt) {
         
         String message = "Please, enter category name:";
-        String text = JOptionPane.showInputDialog(this, message);
+        String categoryName = JOptionPane.showInputDialog(this, message);
         
-        if (text != null) {
-            this.database.insertToSetup(text, null, null, null);
-            this.getDataFromDatabase();
-            this.drawBoxes();
+        if (categoryName != null) {
+            
+            if (this.presCategories.contains(categoryName)) {
+                message = "Category " + categoryName + " already exists!";
+                JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+            else {
+                this.database.insertToSetup(categoryName, null, null, null);
+                this.getDataFromDatabase();
+                this.drawBoxes();
+            }
+
         }
         
     }
@@ -262,6 +328,9 @@ public class Main extends JFrame {
     java.util.List<Map<String, Object>> setupData;
     java.util.List<Map<String, Object>> wordsData;
     java.util.List<Map<String, Object>> organizedData;
+    
+    // For purpose when category is duplicated in database (few sets)
+    ArrayList<String> presCategories;
     
     private JPanel upperPanel;
     private JScrollPane centerScrollPanel;

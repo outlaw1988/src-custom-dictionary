@@ -176,20 +176,10 @@ public class DataBase {
         
     }
     
-    public void removeRecords(String setName) {
-    
-        String sql1 = String.format("DELETE from setup WHERE setName = \'%s\'", setName);
-        String sql2 = String.format("DELETE from words WHERE setName = \'%s\'", setName);
+    public void removeRecords(String sql) {
 
         try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql1)) {
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        
-        try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql2)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
