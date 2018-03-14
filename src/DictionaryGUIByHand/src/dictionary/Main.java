@@ -124,12 +124,14 @@ public class Main extends JFrame {
             boxLabel.setBounds(0, 2, 200, 20);
             box.add(boxLabel);
             
-            JLabel setsNumDescrLab = new JLabel("Sets number: " + this.organizedData.get(i).get("setsNum").toString());
+            JLabel setsNumDescrLab = new JLabel("Sets number: " + 
+                        this.organizedData.get(i).get("setsNum").toString());
             setsNumDescrLab.setHorizontalAlignment(SwingConstants.LEFT);
             setsNumDescrLab.setBounds(100 - 90, 30, 100, 15);
             box.add(setsNumDescrLab);
             
-            JLabel wordsNumDescrLab = new JLabel("Words number: " + this.organizedData.get(i).get("wordsNum").toString());
+            JLabel wordsNumDescrLab = new JLabel("Words number: " + 
+                        this.organizedData.get(i).get("wordsNum").toString());
             wordsNumDescrLab.setHorizontalAlignment(SwingConstants.LEFT);
             wordsNumDescrLab.setBounds(100 - 90, 50, 120, 15);
             box.add(wordsNumDescrLab);
@@ -186,8 +188,6 @@ public class Main extends JFrame {
         this.database = new DataBase();
         String sqlCommand = "SELECT * FROM setup";
         this.setupData = this.database.getData(sqlCommand);
-        //sqlCommand = "SELECT * FROM words";
-        //this.wordsData = this.database.getData(sqlCommand);
         this.createOrganizedData();
         
     }
@@ -206,10 +206,6 @@ public class Main extends JFrame {
             else this.presCategories.add(category);
             
             row.put("category", category);
-//            // TODO Create method in DataBase to count items
-//            row.put("setsNum", getNum(category, this.setupData));
-//            // TODO avoid loading whole wordsData from database
-//            row.put("wordsNum", getNum(category, this.wordsData));
 
             String sqlCommSetsNum = String.format("SELECT COUNT(*) AS rowcount FROM setup "
                     + "WHERE category = \'%s\' AND setName IS NOT NULL", category);
@@ -225,26 +221,9 @@ public class Main extends JFrame {
         }
     }
     
-//    private int getNum(String categoryName, 
-//                       java.util.List<Map<String, Object>> data) {
-//    
-//        int counter = 0;
-//        
-//        for (Map<String, Object> dataItem : data) {
-//            String category = (String)dataItem.get("category");
-//            String setName = (String)dataItem.get("setName");
-//            if (category.equals(categoryName) && setName != null) counter++;
-//        }
-//        
-//        return counter;
-//    }
-    
     private void boxClicked(MouseEvent me) {
     
         String categoryClicked = ((Box)(me.getSource())).categoryId;
-        
-        // TODO place to show new screen
-        //System.out.println("Box clicked for category: " + categoryClicked);
         
         WordsSets wordsSetsScreen = new WordsSets(categoryClicked);
         wordsSetsScreen.setLocationRelativeTo(this);
@@ -261,7 +240,8 @@ public class Main extends JFrame {
                          " ?";
         
         int dialogResult = JOptionPane.showConfirmDialog(this, 
-                message, "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                message, "Warning", JOptionPane.YES_NO_OPTION, 
+                JOptionPane.WARNING_MESSAGE);
         
         if(dialogResult == JOptionPane.YES_OPTION){
             
@@ -287,7 +267,8 @@ public class Main extends JFrame {
             
             if (this.presCategories.contains(categoryName)) {
                 message = "Category " + categoryName + " already exists!";
-                JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, message, "Warning", 
+                                              JOptionPane.WARNING_MESSAGE);
             }
             else {
                 this.database.insertToSetup(categoryName, null, null, null);
@@ -334,17 +315,12 @@ public class Main extends JFrame {
             this.categoryId = category;
         }
         
-        String categoryId;
-//        int setsNum;
-//        int wordsNum;
-//        String language1;
-//        String language2;
+        protected String categoryId;
         
     }
     
     private DataBase database;
     java.util.List<Map<String, Object>> setupData;
-    //java.util.List<Map<String, Object>> wordsData;
     java.util.List<Map<String, Object>> organizedData;
     
     // For purpose when category is duplicated in database (few sets)

@@ -187,6 +187,17 @@ public class DataBase {
         
     }
     
+    public void updateRecords(String sql) {
+ 
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+    }
+    
     public int countRecords(String sqlCommand) {
     
         int counter = 0;
@@ -205,7 +216,6 @@ public class DataBase {
         }
         
         return counter;
-
     }
     
     public ArrayList<String> getWords1() {

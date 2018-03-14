@@ -5,15 +5,7 @@
  */
 package dictionary;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -21,16 +13,9 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 /**
  *
@@ -40,6 +25,7 @@ public class WordsSets extends JFrame {
     
     public WordsSets(String categoryName) {
         this.categoryName = categoryName;
+        this.getDataFromDatabase();
         this.initComponents();
     }
     
@@ -98,7 +84,7 @@ public class WordsSets extends JFrame {
         // Layout
         this.setLayout(new BorderLayout());
         this.add(this.upperPanel, BorderLayout.PAGE_START);
-//        this.add(this.centerScrollPanel, BorderLayout.CENTER);
+        this.add(this.centerScrollPanel, BorderLayout.CENTER);
         this.add(lowerPanel, BorderLayout.PAGE_END);
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -115,6 +101,8 @@ public class WordsSets extends JFrame {
         int gridy = 0;
         int boxInRow = 3;
         
+        System.out.println(this.organizedData);
+        
         for (int i = 0; i < this.organizedData.size(); i++) {
 
             GridBagConstraints gc = new GridBagConstraints();
@@ -122,8 +110,8 @@ public class WordsSets extends JFrame {
             gc.gridx = i % boxInRow;
             if ((i % boxInRow) == 0) gc.gridy = gridy++;
             
-            String category = (String)this.organizedData.get(i).get("category");
-            SetBox box = new SetBox(category);
+            String setName = (String)this.organizedData.get(i).get("setName");
+            SetBox box = new SetBox(setName);
             box.setLayout(null);
             
             box.addMouseListener(new MouseAdapter() {
@@ -144,22 +132,26 @@ public class WordsSets extends JFrame {
             
             box.setPreferredSize(new Dimension(200, 100));
             box.setBorder(BorderFactory.createLineBorder(Color.black));
-            JLabel boxLabel = new JLabel(category);
+            JLabel boxLabel = new JLabel(setName);
             boxLabel.setFont(new Font("Dialog", Font.BOLD, 16));
             boxLabel.setHorizontalAlignment(SwingConstants.CENTER);
             boxLabel.setBounds(0, 2, 200, 20);
             box.add(boxLabel);
             
-            JLabel setsNumDescrLab = new JLabel("Sets number: " + this.organizedData.get(i).get("setsNum").toString());
-            setsNumDescrLab.setHorizontalAlignment(SwingConstants.LEFT);
-            setsNumDescrLab.setBounds(100 - 90, 30, 100, 15);
-            box.add(setsNumDescrLab);
+            JLabel wordsNumLab = new JLabel("Words number: " + 
+                        this.organizedData.get(i).get("wordsNum").toString());
+            wordsNumLab.setHorizontalAlignment(SwingConstants.LEFT);
+            wordsNumLab.setBounds(100 - 90, 30, 120, 15);
+            box.add(wordsNumLab);
             
-            JLabel wordsNumDescrLab = new JLabel("Words number: " + this.organizedData.get(i).get("wordsNum").toString());
-            wordsNumDescrLab.setHorizontalAlignment(SwingConstants.LEFT);
-            wordsNumDescrLab.setBounds(100 - 90, 50, 120, 15);
-            box.add(wordsNumDescrLab);
+            // change
+            JLabel lastResLab = new JLabel("Last result: " + 
+                        this.organizedData.get(i).get("lastResult").toString() + "%");
+            lastResLab.setHorizontalAlignment(SwingConstants.LEFT);
+            lastResLab.setBounds(100 - 90, 50, 120, 15);
+            box.add(lastResLab);
             
+            // Remove button
             BufferedImage img = null;
             
             try {
@@ -168,9 +160,7 @@ public class WordsSets extends JFrame {
                 e.printStackTrace();
             }
 
-//            Image dimg = img.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
             ImageIcon imageIcon = new ImageIcon(img);
-            //JLabel removeIcon = new JLabel(imageIcon);
             JButton removeIcon = new JButton(imageIcon);
             removeIcon.setBounds(150, 30, 30, 30);
             removeIcon.setToolTipText("Remove category");
@@ -183,32 +173,133 @@ public class WordsSets extends JFrame {
             });
             
             box.add(removeIcon);
-            
-            // Languages
-            if (this.organizedData.get(i).get("language1") != null) {
-            
-                JLabel lanLabel = new JLabel(this.organizedData.get(i).
-                                            get("language1").toString() + 
-                                            " <-> " + this.organizedData.get(i).
-                                            get("language2").toString()
-                                            );
-                
-                lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                lanLabel.setBounds(0, 80, 200, 15);
-                box.add(lanLabel);
-            }
+                 
+            JLabel bestResLab = new JLabel("Best result: " + 
+                        this.organizedData.get(i).get("bestResult").toString() + "%");
+            bestResLab.setHorizontalAlignment(SwingConstants.LEFT);
+            bestResLab.setBounds(100 - 90, 70, 200, 15);
+            box.add(bestResLab);
             
             this.setBoxes.add(box);
-            this.categoryPanel.add(box, gc);
+            this.wordsSetsPanel.add(box, gc);
         }
         
-        this.categoryPanel.revalidate();
-        this.categoryPanel.repaint();
+        this.wordsSetsPanel.revalidate();
+        this.wordsSetsPanel.repaint();
+        
+    }
+    
+    private void getDataFromDatabase() {
+    
+        this.database = new DataBase();
+        String sqlCommand = String.format("SELECT * FROM setup WHERE category "
+                                        + "= \'%s\'", this.categoryName);
+        java.util.List<Map<String, Object>> setupData = this.database.getData(sqlCommand);
+        this.createOrganizedData(setupData);
+        
+    }
+    
+    private void createOrganizedData(java.util.List<Map<String, Object>> setupData) {
+    
+        this.organizedData = new ArrayList<>();
+        Map<String, Object> row;
+        this.presSets = new ArrayList<>();
+        
+        for (int i = 0; i < setupData.size(); i++) {
+
+            if (setupData.get(i).get("setName") == null) break;
+            
+            row = new HashMap<>();
+            String setName = (String)setupData.get(i).get("setName");
+            this.presSets.add(setName);
+            
+            row.put("setName", setName);
+            
+            String sqlCommWordsNum = String.format("SELECT COUNT(*) AS rowcount "
+                    + "FROM words "
+                    + "WHERE category = \'%s\' AND setName = \'%s\'", 
+                    this.categoryName, setName);
+            row.put("wordsNum", this.database.countRecords(sqlCommWordsNum));
+
+            row.put("lastResult", (int)setupData.get(i).get("lastResult"));
+            row.put("bestResult", (int)setupData.get(i).get("bestResult"));
+            this.organizedData.add(row);
+        }
+        
+    }
+    
+    private void removeIconClicked(ActionEvent evt) {
+        
+        String setClicked = ((SetBox)((JButton)evt.getSource()).getParent()).setName;
+        
+        String message = "Are you sure you want to remove set " + setClicked + 
+                         " ?";
+        
+        int dialogResult = JOptionPane.showConfirmDialog(this, 
+                           message, "Warning", JOptionPane.YES_NO_OPTION, 
+                           JOptionPane.WARNING_MESSAGE);
+        
+        if(dialogResult == JOptionPane.YES_OPTION){
+            
+            String sqlCommand = String.format("DELETE from setup WHERE setName "
+                                            + "= \'%s\'", setClicked);
+            this.database.removeRecords(sqlCommand);
+            
+            sqlCommand = String.format("DELETE from words WHERE setName "
+                                            + "= \'%s\'", setClicked);
+            this.database.removeRecords(sqlCommand);
+            
+            this.getDataFromDatabase();
+            this.drawBoxes();
+        }
+    }
+    
+    private void boxClicked(MouseEvent me) {
+    
+        String setClicked = ((SetBox)(me.getSource())).setName;
+        
+        // TODO place to show new screen
+        System.out.println("Box clicked for set: " + setClicked);
+        
+//        WordsSets wordsSetsScreen = new WordsSets(categoryClicked);
+//        wordsSetsScreen.setLocationRelativeTo(this);
+//        this.dispose();
+//        wordsSetsScreen.setVisible(true);
         
     }
     
     private void addSetButtActionPerformed(ActionEvent evt) {
     
+        String message = "Please, enter set name:";
+        String setName = JOptionPane.showInputDialog(this, message);
+        
+        if (setName != null) {
+            
+            if (this.presSets.contains(setName)) {
+                message = "Set " + setName + " already exists!";
+                JOptionPane.showMessageDialog(this, message, "Warning", 
+                                              JOptionPane.WARNING_MESSAGE);
+            }
+            else {
+                // If setName list is empty update setName field in database
+                if (this.organizedData.isEmpty()) {
+                    String sql = String.format("UPDATE setup SET setName = \'%s\' "
+                            + "WHERE "
+                            + "category = \'%s\'", setName, this.categoryName);
+                    this.database.updateRecords(sql);
+                }
+                // If not empty add new record
+                else {
+                    this.database.insertToSetup(this.categoryName, setName, 
+                                                null, null);
+                }
+                
+                this.getDataFromDatabase();
+                this.drawBoxes();
+            }
+
+        }
+        
     }
     
     private void goBackButtActionPerformed(ActionEvent evt) {
@@ -241,7 +332,7 @@ public class WordsSets extends JFrame {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                WordsSets wordsSetsScreen = new WordsSets("Test");
+                WordsSets wordsSetsScreen = new WordsSets("Test2");
                 wordsSetsScreen.setLocationRelativeTo(null);
                 wordsSetsScreen.setVisible(true);
             }
@@ -255,16 +346,15 @@ public class WordsSets extends JFrame {
             this.setName = setName;
         }
         
-        String setName;
-//        int setsNum;
-//        int wordsNum;
-//        String language1;
-//        String language2;
+        protected String setName;
         
     }
     
-    String categoryName;
-    private ArrayList<Box> setBoxes;
+    private final String categoryName;
+    private ArrayList<SetBox> setBoxes;
+    private DataBase database;
+    private java.util.List<Map<String, Object>> organizedData;
+    ArrayList<String> presSets;
     
     private JPanel upperPanel;
     private JPanel wordsSetsPanel;
