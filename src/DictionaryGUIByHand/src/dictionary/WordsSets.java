@@ -101,8 +101,6 @@ public class WordsSets extends JFrame {
         int gridy = 0;
         int boxInRow = 3;
         
-        System.out.println(this.organizedData);
-        
         for (int i = 0; i < this.organizedData.size(); i++) {
 
             GridBagConstraints gc = new GridBagConstraints();
@@ -354,7 +352,7 @@ public class WordsSets extends JFrame {
     private ArrayList<SetBox> setBoxes;
     private DataBase database;
     private java.util.List<Map<String, Object>> organizedData;
-    ArrayList<String> presSets;
+    private ArrayList<String> presSets;
     
     private JPanel upperPanel;
     private JPanel wordsSetsPanel;

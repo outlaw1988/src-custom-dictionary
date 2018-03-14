@@ -35,9 +35,12 @@ public class Main extends JFrame {
         
         // Upper panel
         this.upperPanel = new JPanel();
-        this.upperPanel.setLayout(new GridLayout(1, 1));
+        this.upperPanel.setLayout(null);
+        this.upperPanel.setPreferredSize(new Dimension(770, 30));
+        
         this.catIntroLab = new JLabel("Categories");
         this.catIntroLab.setFont(new Font("Dialog", 1, 18));
+        this.catIntroLab.setBounds(0, 0, frameWidth, 30);
         this.catIntroLab.setHorizontalAlignment(SwingConstants.CENTER);
         this.upperPanel.add(this.catIntroLab);
         
@@ -48,7 +51,7 @@ public class Main extends JFrame {
         this.drawBoxes();
         
         this.centerScrollPanel = new JScrollPane(this.categoryPanel, 
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         // increase speed of scrolling
         this.centerScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
@@ -64,7 +67,7 @@ public class Main extends JFrame {
         this.addCatButt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                addActionListenerActionPerformed(evt);
+                addCatButtActionPerformed(evt);
             }
         });
         this.lowerPanel.add(addCatButt);
@@ -165,7 +168,7 @@ public class Main extends JFrame {
             
                 JLabel lanLabel = new JLabel(this.organizedData.get(i).
                                             get("language1").toString() + 
-                                            " <-> " + this.organizedData.get(i).
+                                            " -> " + this.organizedData.get(i).
                                             get("language2").toString()
                                             );
                 
@@ -258,27 +261,36 @@ public class Main extends JFrame {
         }
     }
     
-    private void addActionListenerActionPerformed(ActionEvent evt) {
+    private void addCatButtActionPerformed(ActionEvent evt) {
         
-        String message = "Please, enter category name:";
-        String categoryName = JOptionPane.showInputDialog(this, message);
+        CategoryEdit newCat = new CategoryEdit();
+        newCat.setLocationRelativeTo(this);
+        this.dispose();
+        newCat.setVisible(true);
         
-        if (categoryName != null) {
-            
-            if (this.presCategories.contains(categoryName)) {
-                message = "Category " + categoryName + " already exists!";
-                JOptionPane.showMessageDialog(this, message, "Warning", 
-                                              JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                this.database.insertToSetup(categoryName, null, null, null);
-                this.getDataFromDatabase();
-                this.drawBoxes();
-            }
-
-        }
         
     }
+//    private void addCatButtActionPerformed(ActionEvent evt) {
+//        
+//        String message = "Please, enter category name:";
+//        String categoryName = JOptionPane.showInputDialog(this, message);
+//        
+//        if (categoryName != null) {
+//            
+//            if (this.presCategories.contains(categoryName)) {
+//                message = "Category " + categoryName + " already exists!";
+//                JOptionPane.showMessageDialog(this, message, "Warning", 
+//                                              JOptionPane.WARNING_MESSAGE);
+//            }
+//            else {
+//                this.database.insertToSetup(categoryName, null, null, null);
+//                this.getDataFromDatabase();
+//                this.drawBoxes();
+//            }
+//
+//        }
+//        
+//    }
     
     public static void main(String[] args) {
         
@@ -319,17 +331,17 @@ public class Main extends JFrame {
         
     }
     
-    private DataBase database;
-    java.util.List<Map<String, Object>> setupData;
-    java.util.List<Map<String, Object>> organizedData;
+    protected DataBase database;
+    private java.util.List<Map<String, Object>> setupData;
+    protected java.util.List<Map<String, Object>> organizedData;
     
     // For purpose when category is duplicated in database (few sets)
-    ArrayList<String> presCategories;
+    protected ArrayList<String> presCategories;
     
-    private JPanel upperPanel;
-    private JScrollPane centerScrollPanel;
-    private JPanel categoryPanel;
-    private JPanel lowerPanel;
+    protected JPanel upperPanel;
+    protected JScrollPane centerScrollPanel;
+    protected JPanel categoryPanel;
+    protected JPanel lowerPanel;
     
     private JLabel catIntroLab;
     private ArrayList<Box> boxes;
