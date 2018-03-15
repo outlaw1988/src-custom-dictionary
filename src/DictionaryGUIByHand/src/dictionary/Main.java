@@ -100,6 +100,9 @@ public class Main extends JFrame {
             if ((i % boxInRow) == 0) gc.gridy = gridy++;
             
             String category = (String)this.organizedData.get(i).get("category");
+            String srcLanguage = (String)this.organizedData.get(i).get("language1");
+            String targetLanguage = (String)this.organizedData.get(i).get("language2");
+            
             Box box = new Box(category);
             box.setLayout(null);
             
@@ -142,22 +145,20 @@ public class Main extends JFrame {
             BufferedImage img = null;
             
             try {
-                img = ImageIO.read(new File("../../assets/remove_icon_res.png"));
+                img = ImageIO.read(new File("../../assets/three_dots_res.png"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
 //            Image dimg = img.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
             ImageIcon imageIcon = new ImageIcon(img);
-            //JLabel removeIcon = new JLabel(imageIcon);
-            JButton removeIcon = new JButton(imageIcon);
-            removeIcon.setBounds(150, 30, 30, 30);
-            removeIcon.setToolTipText("Remove category");
+            JLabel removeIcon = new JLabel(imageIcon);
+            //JButton removeIcon = new JButton(imageIcon);
+            removeIcon.setBounds(170, 30, 30, 30);
 
-            removeIcon.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    removeIconClicked(e);
+            removeIcon.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    popUpMenuAction(e, category, srcLanguage, targetLanguage);
                 }
             });
             
@@ -166,11 +167,7 @@ public class Main extends JFrame {
             // Languages
             if (this.organizedData.get(i).get("language1") != null) {
             
-                JLabel lanLabel = new JLabel(this.organizedData.get(i).
-                                            get("language1").toString() + 
-                                            " -> " + this.organizedData.get(i).
-                                            get("language2").toString()
-                                            );
+                JLabel lanLabel = new JLabel(srcLanguage + " -> " + targetLanguage);
                 
                 lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
                 lanLabel.setBounds(0, 80, 200, 15);
@@ -261,6 +258,67 @@ public class Main extends JFrame {
         }
     }
     
+    private void popUpMenuAction(MouseEvent evt, String categoryName, 
+                                 String srcLanguage, String targetLanguage){
+    
+        this.menu = new JPopupMenu();
+        
+        JMenuItem renameItem = new MenuItem(categoryName, srcLanguage, 
+                                            targetLanguage);
+        renameItem.setText("rename");
+        renameItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Rename clicked...");
+            }
+        });
+        
+        JMenuItem removeItem = new MenuItem(categoryName, srcLanguage, 
+                                            targetLanguage);
+        removeItem.setText("remove");
+        removeItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Remove clicked...");
+            }
+        });
+        
+        JMenuItem editItem = new MenuItem(categoryName, srcLanguage, 
+                                          targetLanguage);
+        editItem.setText("edit");
+        editItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editItemClicked(e);
+            }
+        });
+        
+        this.menu.add(renameItem);
+        this.menu.add(removeItem);
+        this.menu.add(editItem);
+        
+        this.menu.show(evt.getComponent(), evt.getX(), evt.getY());
+        
+    }
+    
+    private void editItemClicked(ActionEvent evt) {
+    
+        System.out.println("Edit clicked, action perfomed...");
+        //System.out.println(((Box)((JLabel)((JPopupMenu)((JMenuItem)evt.getSource()).getParent()).getInvoker()).getParent()).categoryId);
+        String categoryName = ((MenuItem)evt.getSource()).categoryName;
+        String srcLanguage = ((MenuItem)evt.getSource()).srcLanguage;
+        String targetLanguage = ((MenuItem)evt.getSource()).targetLanguage;
+        // TODO add languages
+        System.out.println(categoryName);
+        
+        CategoryEdit newCat = new CategoryEdit(categoryName, srcLanguage, 
+                                               targetLanguage);
+        newCat.setLocationRelativeTo(this);
+        this.dispose();
+        newCat.setVisible(true);
+        
+    }
+    
     private void addCatButtActionPerformed(ActionEvent evt) {
         
         CategoryEdit newCat = new CategoryEdit();
@@ -328,8 +386,23 @@ public class Main extends JFrame {
         }
         
         protected String categoryId;
-        
     }
+    
+    private class MenuItem extends JMenuItem {
+    
+        public MenuItem(String categoryName, String srcLanguage, 
+                        String targetLanguage) {
+            super();
+            this.categoryName = categoryName;
+            this.srcLanguage = srcLanguage;
+            this.targetLanguage = targetLanguage;
+        }
+        
+        protected String categoryName;
+        protected String srcLanguage;
+        protected String targetLanguage;
+    
+    } 
     
     protected DataBase database;
     private java.util.List<Map<String, Object>> setupData;
@@ -346,5 +419,7 @@ public class Main extends JFrame {
     private JLabel catIntroLab;
     private ArrayList<Box> boxes;
     private JButton addCatButt;
+    
+    private JPopupMenu menu;
     
 }

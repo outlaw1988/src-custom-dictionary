@@ -26,6 +26,18 @@ public class CategoryEdit extends Main {
     
     public CategoryEdit() {
     
+        this.editMode = false;
+        initComponents();
+        
+    }
+    
+    public CategoryEdit(String categoryName, String srcLanguage, 
+                        String targetLanguage) {
+    
+        this.editMode = true;
+        this.initCategoryName = categoryName;
+        this.srcLanguage = srcLanguage;
+        this.targetLanguage = targetLanguage;
         initComponents();
         
     }
@@ -53,6 +65,9 @@ public class CategoryEdit extends Main {
         
         this.catNameField = new JTextField();
         this.catNameField.setFont(new Font("Dialog", 1, 14));
+        
+        if (this.editMode) this.catNameField.setText(this.initCategoryName);
+        
         this.catNameField.setBounds(frameWidth/2 + 10, 50, 150, 30);
         this.catNameField.setHorizontalAlignment(SwingConstants.LEFT);
         this.catNameField.addFocusListener(new FocusAdapter() {
@@ -72,6 +87,9 @@ public class CategoryEdit extends Main {
         String[] sourceLanguages = {"Polish", "English", "Spanish", "German", "Italian"};
         this.srcLanBox = new JComboBox(sourceLanguages);
         this.srcLanBox.setFont(new Font("Dialog", 1, 14));
+
+        if (this.editMode) this.srcLanBox.setSelectedItem(this.srcLanguage);
+        
         this.srcLanBox.setBounds(frameWidth/2 + 10, 90, 150, 30);
         this.categoryPanel.add(this.srcLanBox);
         
@@ -85,6 +103,9 @@ public class CategoryEdit extends Main {
         String[] targetLanguages = {"English", "Polish", "Spanish", "German", "Italian"};
         this.targetLanBox = new JComboBox(targetLanguages);
         this.targetLanBox.setFont(new Font("Dialog", 1, 14));
+        
+        if (this.editMode) this.targetLanBox.setSelectedItem(this.targetLanguage);
+        
         this.targetLanBox.setBounds(frameWidth/2 + 10, 130, 150, 30);
         this.categoryPanel.add(this.targetLanBox);
         
@@ -125,6 +146,7 @@ public class CategoryEdit extends Main {
         this.categoryName = this.catNameField.getText();
     }
     
+    // TODO Refactor this method
     private void confirmButtActionPerformed(ActionEvent evt) {
         
         if (this.categoryName.equals("")) {
@@ -132,7 +154,7 @@ public class CategoryEdit extends Main {
             JOptionPane.showMessageDialog(this, message, "Warning", 
                                           JOptionPane.WARNING_MESSAGE);
         }
-        else if (this.presCategories.contains(this.categoryName)) {
+        else if (this.presCategories.contains(this.categoryName) && !this.editMode) {
             String message = "Category " + this.categoryName + " already exists!";
             JOptionPane.showMessageDialog(this, message, "Warning", 
                                           JOptionPane.WARNING_MESSAGE);
@@ -144,22 +166,41 @@ public class CategoryEdit extends Main {
                                           JOptionPane.WARNING_MESSAGE);
         }
         else {
-            // TODO Add languages instead of nulls go to Main screen
-            this.database.insertToSetup(categoryName, null, 
+            
+            // TODO consider case when new category name is the same as one of categories
+            if (this.editMode) {
+                System.out.println("Edit mode...");
+                
+                String sql = String.format("UPDATE setup SET category = \'%s\', "
+                        + "language1 = \'%s\', language2 = \'%s\' WHERE category "
+                        + "= \'%s\'", this.categoryName, this.srcLanBox.getSelectedItem().
+                                toString(), 
+                        this.targetLanBox.getSelectedItem().toString(), 
+                        this.initCategoryName);
+                this.database.updateRecords(sql);
+                
+                sql = String.format("UPDATE words SET category = \'%s\'"
+                        + " WHERE category = \'%s\'", this.categoryName,
+                        this.initCategoryName);
+                this.database.updateRecords(sql);
+            }
+            else {
+                this.database.insertToSetup(categoryName, null, 
                                 this.srcLanBox.getSelectedItem().toString(), 
                                 this.targetLanBox.getSelectedItem().toString());
+            }
             
-            this.openMainScreen();
+            this.showMainScreen();
         }
         
     }
     
     private void cancelButtActionPerformed(ActionEvent evt) {
     
-        this.openMainScreen();
+        this.showMainScreen();
     }
     
-    private void openMainScreen() {
+    private void showMainScreen() {
         
         Main mainScreen = new Main();
         mainScreen.setLocationRelativeTo(this);
@@ -173,5 +214,9 @@ public class CategoryEdit extends Main {
     private JComboBox srcLanBox, targetLanBox;
     
     private String categoryName;
+    private String initCategoryName;
+    private String srcLanguage;
+    private String targetLanguage;
+    private final boolean editMode;
     
 }
