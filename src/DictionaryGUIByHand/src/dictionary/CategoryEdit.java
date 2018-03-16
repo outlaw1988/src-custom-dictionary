@@ -6,17 +6,8 @@
 package dictionary;
 
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import java.awt.event.*;
+import javax.swing.*;
 
 /**
  *
@@ -99,7 +90,6 @@ public class CategoryEdit extends Main {
         this.targetLanLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.categoryPanel.add(this.targetLanLab);
         
-        // TODO check whether languages not repeat
         String[] targetLanguages = {"English", "Polish", "Spanish", "German", "Italian"};
         this.targetLanBox = new JComboBox(targetLanguages);
         this.targetLanBox.setFont(new Font("Dialog", 1, 14));
@@ -108,7 +98,6 @@ public class CategoryEdit extends Main {
         
         this.targetLanBox.setBounds(frameWidth/2 + 10, 130, 150, 30);
         this.categoryPanel.add(this.targetLanBox);
-        
         // Central panel end
 
         // Lower panel
@@ -146,7 +135,6 @@ public class CategoryEdit extends Main {
         this.categoryName = this.catNameField.getText();
     }
     
-    // TODO Refactor this method
     private void confirmButtActionPerformed(ActionEvent evt) {
         
         if (this.categoryName.equals("")) {
@@ -154,7 +142,8 @@ public class CategoryEdit extends Main {
             JOptionPane.showMessageDialog(this, message, "Warning", 
                                           JOptionPane.WARNING_MESSAGE);
         }
-        else if (this.presCategories.contains(this.categoryName) && !this.editMode) {
+        else if (this.presCategories.contains(this.categoryName) && 
+                !(this.initCategoryName.equals(this.categoryName))) {
             String message = "Category " + this.categoryName + " already exists!";
             JOptionPane.showMessageDialog(this, message, "Warning", 
                                           JOptionPane.WARNING_MESSAGE);
@@ -167,32 +156,34 @@ public class CategoryEdit extends Main {
         }
         else {
             
-            // TODO consider case when new category name is the same as one of categories
-            if (this.editMode) {
-                System.out.println("Edit mode...");
-                
-                String sql = String.format("UPDATE setup SET category = \'%s\', "
-                        + "language1 = \'%s\', language2 = \'%s\' WHERE category "
-                        + "= \'%s\'", this.categoryName, this.srcLanBox.getSelectedItem().
-                                toString(), 
-                        this.targetLanBox.getSelectedItem().toString(), 
-                        this.initCategoryName);
-                this.database.updateRecords(sql);
-                
-                sql = String.format("UPDATE words SET category = \'%s\'"
-                        + " WHERE category = \'%s\'", this.categoryName,
-                        this.initCategoryName);
-                this.database.updateRecords(sql);
-            }
-            else {
-                this.database.insertToSetup(categoryName, null, 
-                                this.srcLanBox.getSelectedItem().toString(), 
-                                this.targetLanBox.getSelectedItem().toString());
-            }
-            
-            this.showMainScreen();
+            this.updateOrInsertToDatabase();
         }
         
+    }
+    
+    private void updateOrInsertToDatabase() {
+    
+        if (this.editMode) {
+            String sql = String.format("UPDATE setup SET category = \'%s\', "
+                    + "language1 = \'%s\', language2 = \'%s\' WHERE category "
+                    + "= \'%s\'", this.categoryName, this.srcLanBox.getSelectedItem().
+                            toString(), 
+                    this.targetLanBox.getSelectedItem().toString(), 
+                    this.initCategoryName);
+            this.database.updateRecords(sql);
+
+            sql = String.format("UPDATE words SET category = \'%s\'"
+                    + " WHERE category = \'%s\'", this.categoryName,
+                    this.initCategoryName);
+            this.database.updateRecords(sql);
+        }
+        else {
+            this.database.insertToSetup(categoryName, null, 
+                            this.srcLanBox.getSelectedItem().toString(), 
+                            this.targetLanBox.getSelectedItem().toString());
+        }
+
+        this.showMainScreen();
     }
     
     private void cancelButtActionPerformed(ActionEvent evt) {

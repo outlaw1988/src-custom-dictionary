@@ -7,10 +7,7 @@ package dictionary;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -234,7 +231,7 @@ public class Main extends JFrame {
     
     private void removeIconClicked(ActionEvent evt) {
         
-        String categoryClicked = ((Box)((JButton)evt.getSource()).getParent()).categoryId;
+        String categoryClicked = ((MenuItem)evt.getSource()).categoryName;
         
         String message = "Are you sure you want to remove category " + categoryClicked + 
                          " ?";
@@ -263,15 +260,15 @@ public class Main extends JFrame {
     
         this.menu = new JPopupMenu();
         
-        JMenuItem renameItem = new MenuItem(categoryName, srcLanguage, 
-                                            targetLanguage);
-        renameItem.setText("rename");
-        renameItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Rename clicked...");
-            }
-        });
+//        JMenuItem renameItem = new MenuItem(categoryName, srcLanguage, 
+//                                            targetLanguage);
+//        renameItem.setText("rename");
+//        renameItem.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                System.out.println("Rename clicked...");
+//            }
+//        });
         
         JMenuItem removeItem = new MenuItem(categoryName, srcLanguage, 
                                             targetLanguage);
@@ -279,7 +276,7 @@ public class Main extends JFrame {
         removeItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Remove clicked...");
+                removeIconClicked(e);
             }
         });
         
@@ -293,7 +290,7 @@ public class Main extends JFrame {
             }
         });
         
-        this.menu.add(renameItem);
+        //this.menu.add(renameItem);
         this.menu.add(removeItem);
         this.menu.add(editItem);
         
@@ -326,29 +323,7 @@ public class Main extends JFrame {
         this.dispose();
         newCat.setVisible(true);
         
-        
     }
-//    private void addCatButtActionPerformed(ActionEvent evt) {
-//        
-//        String message = "Please, enter category name:";
-//        String categoryName = JOptionPane.showInputDialog(this, message);
-//        
-//        if (categoryName != null) {
-//            
-//            if (this.presCategories.contains(categoryName)) {
-//                message = "Category " + categoryName + " already exists!";
-//                JOptionPane.showMessageDialog(this, message, "Warning", 
-//                                              JOptionPane.WARNING_MESSAGE);
-//            }
-//            else {
-//                this.database.insertToSetup(categoryName, null, null, null);
-//                this.getDataFromDatabase();
-//                this.drawBoxes();
-//            }
-//
-//        }
-//        
-//    }
     
     public static void main(String[] args) {
         
