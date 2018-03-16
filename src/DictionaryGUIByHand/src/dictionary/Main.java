@@ -100,7 +100,7 @@ public class Main extends JFrame {
             String srcLanguage = (String)this.organizedData.get(i).get("language1");
             String targetLanguage = (String)this.organizedData.get(i).get("language2");
             
-            Box box = new Box(category);
+            Box box = new Box(category, srcLanguage, targetLanguage);
             box.setLayout(null);
             
             box.addMouseListener(new MouseAdapter() {
@@ -148,18 +148,18 @@ public class Main extends JFrame {
             }
 
 //            Image dimg = img.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
-            ImageIcon imageIcon = new ImageIcon(img);
-            JLabel removeIcon = new JLabel(imageIcon);
+            ImageIcon dots = new ImageIcon(img);
+            JLabel dotsLab = new JLabel(dots);
             //JButton removeIcon = new JButton(imageIcon);
-            removeIcon.setBounds(170, 30, 30, 30);
+            dotsLab.setBounds(170, 30, 30, 30);
 
-            removeIcon.addMouseListener(new MouseAdapter() {
+            dotsLab.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     popUpMenuAction(e, category, srcLanguage, targetLanguage);
                 }
             });
             
-            box.add(removeIcon);
+            box.add(dotsLab);
             
             // Languages
             if (this.organizedData.get(i).get("language1") != null) {
@@ -221,8 +221,11 @@ public class Main extends JFrame {
     private void boxClicked(MouseEvent me) {
     
         String categoryClicked = ((Box)(me.getSource())).categoryId;
+        String srcLanguage = ((Box)(me.getSource())).srcLanguage;
+        String targetLanguage = ((Box)(me.getSource())).targetLanguage;
         
-        WordsSets wordsSetsScreen = new WordsSets(categoryClicked);
+        WordsSets wordsSetsScreen = new WordsSets(categoryClicked, srcLanguage, 
+                                                  targetLanguage, this.presCategories);
         wordsSetsScreen.setLocationRelativeTo(this);
         this.dispose();
         wordsSetsScreen.setVisible(true);
@@ -305,8 +308,6 @@ public class Main extends JFrame {
         String categoryName = ((MenuItem)evt.getSource()).categoryName;
         String srcLanguage = ((MenuItem)evt.getSource()).srcLanguage;
         String targetLanguage = ((MenuItem)evt.getSource()).targetLanguage;
-        // TODO add languages
-        System.out.println(categoryName);
         
         CategoryEdit newCat = new CategoryEdit(categoryName, srcLanguage, 
                                                targetLanguage);
@@ -355,12 +356,16 @@ public class Main extends JFrame {
     
     private class Box extends JPanel {
     
-        public Box(String category) {
+        public Box(String category, String srcLanguage, String targetLanguage) {
             super();
             this.categoryId = category;
+            this.srcLanguage = srcLanguage;
+            this.targetLanguage = targetLanguage;
         }
         
         protected String categoryId;
+        protected String srcLanguage;
+        protected String targetLanguage;
     }
     
     private class MenuItem extends JMenuItem {

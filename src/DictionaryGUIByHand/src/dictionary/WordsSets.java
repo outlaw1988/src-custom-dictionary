@@ -6,10 +6,7 @@
 package dictionary;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +20,12 @@ import javax.swing.*;
  */
 public class WordsSets extends JFrame {
     
-    public WordsSets(String categoryName) {
+    public WordsSets(String categoryName, String srcLanguage, 
+                     String targetLanguage, ArrayList<String> presCategories) {
         this.categoryName = categoryName;
+        this.srcLanguage = srcLanguage;
+        this.targetLanguage = targetLanguage;
+        this.presCategories = presCategories;
         this.getDataFromDatabase();
         this.initComponents();
     }
@@ -37,7 +38,8 @@ public class WordsSets extends JFrame {
         // Upper panel
         this.upperPanel = new JPanel();
         this.upperPanel.setLayout(new GridLayout(1, 1));
-        this.wordsSetIntroLab = new JLabel("Sets of words for category: " + this.categoryName);
+        this.wordsSetIntroLab = new JLabel("Sets of words for category: " + 
+                                           this.categoryName);
         this.wordsSetIntroLab.setFont(new Font("Dialog", 1, 18));
         this.wordsSetIntroLab.setHorizontalAlignment(SwingConstants.CENTER);
         this.upperPanel.add(this.wordsSetIntroLab);
@@ -49,7 +51,7 @@ public class WordsSets extends JFrame {
         this.drawBoxes();
         
         this.centerScrollPanel = new JScrollPane(this.wordsSetsPanel, 
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         // increase speed of scrolling
         this.centerScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
@@ -153,24 +155,22 @@ public class WordsSets extends JFrame {
             BufferedImage img = null;
             
             try {
-                img = ImageIO.read(new File("../../assets/remove_icon_res.png"));
+                img = ImageIO.read(new File("../../assets/three_dots_res.png"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            ImageIcon imageIcon = new ImageIcon(img);
-            JButton removeIcon = new JButton(imageIcon);
-            removeIcon.setBounds(150, 30, 30, 30);
-            removeIcon.setToolTipText("Remove category");
+            ImageIcon dots = new ImageIcon(img);
+            JLabel dotsLab = new JLabel(dots);
+            dotsLab.setBounds(170, 30, 30, 30);
 
-            removeIcon.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    removeIconClicked(e);
+            dotsLab.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    popUpMenuAction(e, setName);
                 }
             });
             
-            box.add(removeIcon);
+            box.add(dotsLab);
                  
             JLabel bestResLab = new JLabel("Best result: " + 
                         this.organizedData.get(i).get("bestResult").toString() + "%");
@@ -184,6 +184,57 @@ public class WordsSets extends JFrame {
         
         this.wordsSetsPanel.revalidate();
         this.wordsSetsPanel.repaint();
+        
+    }
+    
+    private void popUpMenuAction(MouseEvent evt, String setName) {
+    
+        this.menu = new JPopupMenu();
+        
+        JMenuItem renameItem = new MenuItem(setName);
+        renameItem.setText("rename");
+        renameItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                renameSetClicked(e);
+            }
+        });
+        
+        JMenuItem removeItem = new MenuItem(setName);
+        removeItem.setText("remove");
+        removeItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeIconClicked(e);
+            }
+        });
+        
+        JMenuItem editItem = new MenuItem(setName);
+        editItem.setText("edit");
+        editItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Edit clicked...");
+            }
+        });
+        
+        // TODO Currently - not used, requires more work
+//        JMenuItem changeCatItem = new MenuItem(setName);
+//        changeCatItem.setText("change category");
+//        changeCatItem.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                System.out.println("Change category clicked...");
+//                changeCategoryClicked(e);
+//            }
+//        });
+        
+        this.menu.add(renameItem);
+        this.menu.add(removeItem);
+        this.menu.add(editItem);
+//        this.menu.add(changeCatItem);
+        
+        this.menu.show(evt.getComponent(), evt.getX(), evt.getY());
         
     }
     
@@ -226,9 +277,73 @@ public class WordsSets extends JFrame {
         
     }
     
+    // TODO Currently - not used, requires more work
+    private void changeCategoryClicked(ActionEvent evt) {
+    
+        this.presCategories.remove(this.categoryName);
+        String[] catsToChoose = this.presCategories.toArray(new String[0]);
+        String setClicked = ((MenuItem)evt.getSource()).setName;
+        
+        String message = "Select desired category:";
+        
+        String newCategory = (String)JOptionPane.showInputDialog(
+                                this,
+                                message,
+                                "Select category",
+                                JOptionPane.PLAIN_MESSAGE,
+                                null,
+                                catsToChoose,
+                                null);
+        
+        System.out.println(newCategory);
+        
+        if (newCategory != null) {
+        
+            String sqlCommand = String.format("UPDATE setup SET category = \'%s\'"
+                    + " WHERE category = \'%s\' AND setName = \'%s\'", newCategory, 
+                    this.categoryName, setClicked);
+            this.database.updateRecords(sqlCommand);
+            
+            sqlCommand = String.format("UPDATE words SET category = \'%s\'"
+                    + " WHERE category = \'%s\' AND setName = \'%s\'", newCategory, 
+                    this.categoryName, setClicked);
+            this.database.updateRecords(sqlCommand);
+                        
+            this.getDataFromDatabase();
+            this.drawBoxes();
+        }
+    }
+    
+    private void renameSetClicked(ActionEvent evt) {
+    
+        String setClicked = ((MenuItem)evt.getSource()).setName;
+        
+        String message = "Please, enter set name:";
+        String setName = JOptionPane.showInputDialog(this, message, setClicked);
+        
+        if (setName != null && !setName.equals(setClicked)) {
+        
+            String sqlCommand = String.format("UPDATE setup SET setName = \'%s\'"
+                    + " WHERE category = \'%s\' AND setName = \'%s\'", setName, 
+                    this.categoryName, setClicked);
+            
+            this.database.updateRecords(sqlCommand);
+            
+            sqlCommand = String.format("UPDATE words SET setName = \'%s\'"
+                    + " WHERE category = \'%s\' AND setName = \'%s\'", setName, 
+                    this.categoryName, setClicked);
+            
+            this.database.updateRecords(sqlCommand);
+            
+            this.getDataFromDatabase();
+            this.drawBoxes();
+        }
+    
+    }
+    
     private void removeIconClicked(ActionEvent evt) {
         
-        String setClicked = ((SetBox)((JButton)evt.getSource()).getParent()).setName;
+        String setClicked = ((MenuItem)evt.getSource()).setName;
         
         String message = "Are you sure you want to remove set " + setClicked + 
                          " ?";
@@ -239,12 +354,14 @@ public class WordsSets extends JFrame {
         
         if(dialogResult == JOptionPane.YES_OPTION){
             
-            String sqlCommand = String.format("DELETE from setup WHERE setName "
-                                            + "= \'%s\'", setClicked);
+            String sqlCommand = String.format("DELETE from setup WHERE category "
+                                    + "= \'%s\' AND setName = \'%s\'", 
+                                    this.categoryName, setClicked);
             this.database.removeRecords(sqlCommand);
             
-            sqlCommand = String.format("DELETE from words WHERE setName "
-                                            + "= \'%s\'", setClicked);
+            sqlCommand = String.format("DELETE from words WHERE category "
+                                    + "= \'%s\' AND setName = \'%s\'", 
+                                    this.categoryName, setClicked);
             this.database.removeRecords(sqlCommand);
             
             this.getDataFromDatabase();
@@ -280,6 +397,7 @@ public class WordsSets extends JFrame {
             }
             else {
                 // If setName list is empty update setName field in database
+                // Means - first set in category
                 if (this.organizedData.isEmpty()) {
                     String sql = String.format("UPDATE setup SET setName = \'%s\' "
                             + "WHERE "
@@ -289,7 +407,7 @@ public class WordsSets extends JFrame {
                 // If not empty add new record
                 else {
                     this.database.insertToSetup(this.categoryName, setName, 
-                                                null, null);
+                                                this.srcLanguage, this.targetLanguage);
                 }
                 
                 this.getDataFromDatabase();
@@ -330,7 +448,12 @@ public class WordsSets extends JFrame {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                WordsSets wordsSetsScreen = new WordsSets("Test2");
+                ArrayList<String> presCats = new ArrayList<>();
+                presCats.add("Family");
+                presCats.add("Cars");
+                presCats.add("Test");
+                WordsSets wordsSetsScreen = new WordsSets("Test4", "Polish", 
+                                                          "English", presCats);
                 wordsSetsScreen.setLocationRelativeTo(null);
                 wordsSetsScreen.setVisible(true);
             }
@@ -348,16 +471,32 @@ public class WordsSets extends JFrame {
         
     }
     
+    private class MenuItem extends JMenuItem {
+    
+        public MenuItem(String setName) {
+            super();
+            this.setName = setName;
+        }
+        
+        protected String setName;
+        // TODO Use if necessary
+//        protected String srcLanguage;
+//        protected String targetLanguage;
+    
+    }
+    
     private final String categoryName;
+    private String srcLanguage;
+    private String targetLanguage;
+    private ArrayList<String> presCategories;
     private ArrayList<SetBox> setBoxes;
     private DataBase database;
     private java.util.List<Map<String, Object>> organizedData;
     private ArrayList<String> presSets;
     
-    private JPanel upperPanel;
-    private JPanel wordsSetsPanel;
-    private JPanel lowerPanel;
+    private JPanel upperPanel, wordsSetsPanel, lowerPanel;
     private JScrollPane centerScrollPanel;
+    private JPopupMenu menu;
     
     private JLabel wordsSetIntroLab;
     private JButton addSetButt;
