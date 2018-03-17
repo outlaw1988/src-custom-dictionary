@@ -69,9 +69,9 @@ public class CategoryEdit extends Main {
         });
         this.categoryPanel.add(this.catNameField);
         
-        this.srcLanLab = new JLabel("Source language:");
+        this.srcLanLab = new JLabel("Default source language:");
         this.srcLanLab.setFont(new Font("Dialog", 1, 14));
-        this.srcLanLab.setBounds(frameWidth/2 - 150, 90, 150, 30);
+        this.srcLanLab.setBounds(frameWidth/2 - 200, 90, 200, 30);
         this.srcLanLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.categoryPanel.add(this.srcLanLab);
         
@@ -84,9 +84,9 @@ public class CategoryEdit extends Main {
         this.srcLanBox.setBounds(frameWidth/2 + 10, 90, 150, 30);
         this.categoryPanel.add(this.srcLanBox);
         
-        this.targetLanLab = new JLabel("Target language:");
+        this.targetLanLab = new JLabel("Default target language:");
         this.targetLanLab.setFont(new Font("Dialog", 1, 14));
-        this.targetLanLab.setBounds(frameWidth/2 - 150, 130, 150, 30);
+        this.targetLanLab.setBounds(frameWidth/2 - 200, 130, 200, 30);
         this.targetLanLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.categoryPanel.add(this.targetLanLab);
         

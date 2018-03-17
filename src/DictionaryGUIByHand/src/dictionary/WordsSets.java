@@ -36,12 +36,15 @@ public class WordsSets extends JFrame {
         int frameHeight = 550;
         
         // Upper panel
-        this.upperPanel = new JPanel();
-        this.upperPanel.setLayout(new GridLayout(1, 1));
+        this.upperPanel = new JPanel(null);
+        this.upperPanel.setPreferredSize(new Dimension(770, 30));
+        
         this.wordsSetIntroLab = new JLabel("Sets of words for category: " + 
                                            this.categoryName);
         this.wordsSetIntroLab.setFont(new Font("Dialog", 1, 18));
+        this.wordsSetIntroLab.setBounds(0, 0, frameWidth, 30);
         this.wordsSetIntroLab.setHorizontalAlignment(SwingConstants.CENTER);
+        
         this.upperPanel.add(this.wordsSetIntroLab);
         
         // Center panel
@@ -376,45 +379,46 @@ public class WordsSets extends JFrame {
         // TODO place to show new screen
         System.out.println("Box clicked for set: " + setClicked);
         
-//        WordsSets wordsSetsScreen = new WordsSets(categoryClicked);
-//        wordsSetsScreen.setLocationRelativeTo(this);
-//        this.dispose();
-//        wordsSetsScreen.setVisible(true);
-        
     }
     
     private void addSetButtActionPerformed(ActionEvent evt) {
     
-        String message = "Please, enter set name:";
-        String setName = JOptionPane.showInputDialog(this, message);
+        WordsSetDefEdit wordsSetDefEdit = new WordsSetDefEdit(this.srcLanguage, 
+                                          this.targetLanguage);
+        wordsSetDefEdit.setLocationRelativeTo(this);
+        this.dispose();
+        wordsSetDefEdit.setVisible(true);
         
-        if (setName != null) {
-            
-            if (this.presSets.contains(setName)) {
-                message = "Set " + setName + " already exists!";
-                JOptionPane.showMessageDialog(this, message, "Warning", 
-                                              JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                // If setName list is empty update setName field in database
-                // Means - first set in category
-                if (this.organizedData.isEmpty()) {
-                    String sql = String.format("UPDATE setup SET setName = \'%s\' "
-                            + "WHERE "
-                            + "category = \'%s\'", setName, this.categoryName);
-                    this.database.updateRecords(sql);
-                }
-                // If not empty add new record
-                else {
-                    this.database.insertToSetup(this.categoryName, setName, 
-                                                this.srcLanguage, this.targetLanguage);
-                }
-                
-                this.getDataFromDatabase();
-                this.drawBoxes();
-            }
-
-        }
+//        String message = "Please, enter set name:";
+//        String setName = JOptionPane.showInputDialog(this, message);
+//        
+//        if (setName != null) {
+//            
+//            if (this.presSets.contains(setName)) {
+//                message = "Set " + setName + " already exists!";
+//                JOptionPane.showMessageDialog(this, message, "Warning", 
+//                                              JOptionPane.WARNING_MESSAGE);
+//            }
+//            else {
+//                // If setName list is empty update setName field in database
+//                // Means - first set in category
+//                if (this.organizedData.isEmpty()) {
+//                    String sql = String.format("UPDATE setup SET setName = \'%s\' "
+//                            + "WHERE "
+//                            + "category = \'%s\'", setName, this.categoryName);
+//                    this.database.updateRecords(sql);
+//                }
+//                // If not empty add new record
+//                else {
+//                    this.database.insertToSetup(this.categoryName, setName, 
+//                                                this.srcLanguage, this.targetLanguage);
+//                }
+//                
+//                this.getDataFromDatabase();
+//                this.drawBoxes();
+//            }
+//
+//        }
         
     }
     
