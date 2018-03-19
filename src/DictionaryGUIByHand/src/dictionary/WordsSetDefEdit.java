@@ -6,8 +6,8 @@
 package dictionary;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.util.ArrayList;
 import javax.swing.*;
 
 /**
@@ -78,6 +78,7 @@ public class WordsSetDefEdit extends JFrame {
         this.targetLanLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.upperPanel.add(this.targetLanLab);
         
+        // Choosing target language
         String[] optionsTargetLan = {this.targetLanguage, this.srcLanguage};
         this.targetLanCombo = new JComboBox(optionsTargetLan);
         this.targetLanCombo.setFont(new Font("Dialog", 1, 14));
@@ -85,7 +86,9 @@ public class WordsSetDefEdit extends JFrame {
         this.targetLanCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                drawCenterPanel();
+                updateLanguages();
+                updateHeaderCenterPanel();
+                updateFieldsCentralPanelLanguages();
             }
         });
         this.upperPanel.add(this.targetLanCombo);
@@ -96,6 +99,7 @@ public class WordsSetDefEdit extends JFrame {
         this.targetLanLocationLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.upperPanel.add(this.targetLanLocationLab);
         
+        // Choosing target side
         String[] optionsSide = {"left", "right"};
         this.targetLanLocationCombo = new JComboBox(optionsSide);
         this.targetLanLocationCombo.setFont(new Font("Dialog", 1, 14));
@@ -103,19 +107,23 @@ public class WordsSetDefEdit extends JFrame {
         this.targetLanLocationCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                 drawCenterPanel();
+                determSides();
+                updateHeaderCenterPanel();
+                updateFieldsCenterPanelSwapSides();
             }
         });
-        this.upperPanel.add(this.targetLanLocationCombo);
         
+        this.determSides();
+        this.upperPanel.add(this.targetLanLocationCombo);
         // Upper panel end
         
         // Center panel
-        this.wordsEditPanel = new JPanel(null);
+        this.centerPanel = new JPanel(null);
+        this.headerCenterPanel = new JPanel(null);
         
-        this.drawCenterPanel();
+        this.initCenterPanel();
         
-        this.centerScrollPanel = new JScrollPane(this.wordsEditPanel, 
+        this.centerScrollPanel = new JScrollPane(this.centerPanel, 
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         // increase speed of scrolling
@@ -176,13 +184,21 @@ public class WordsSetDefEdit extends JFrame {
         this.setLayout(new BorderLayout());
         this.add(this.upperPanel, BorderLayout.PAGE_START);
         this.add(this.centerScrollPanel, BorderLayout.CENTER);
-        this.add(lowerPanel, BorderLayout.PAGE_END);
+        this.add(this.lowerPanel, BorderLayout.PAGE_END);
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Interactive dictionary");
         setResizable(false);
         setSize(frameWidth, frameHeight);
         
+    }
+    
+    private void determSides() {
+    
+        this.targetSide = this.targetLanLocationCombo.getSelectedItem().toString();
+        if (this.targetSide.equals("left")) this.srcSide = "right";
+        else this.srcSide = "left";
+    
     }
     
     private void updateLanguages() {
@@ -194,43 +210,33 @@ public class WordsSetDefEdit extends JFrame {
         }
     }
     
-    private void drawCenterPanel() {
+    private void initCenterPanel() {
     
-        this.wordsEditPanel.removeAll();
-
-        String selectedSideOpt = this.targetLanLocationCombo.getSelectedItem().toString();
-        this.updateLanguages();
-        
         this.leftLanTypeLab = new JLabel();
         this.leftLanLab = new JLabel();
         
-        if (selectedSideOpt.equals("left")){
-            this.leftLanTypeLab.setText("Target language:");
-            this.leftLanLab.setText(this.targetLanguage);
-        }
-        else {
-            this.leftLanTypeLab.setText("Source Language:");
-            this.leftLanLab.setText(this.srcLanguage);
-        }
-            
         this.leftLanTypeLab.setFont(new Font("Dialog", 1, 14));
         this.leftLanTypeLab.setBounds(this.frameWidth/2 - 250, 10, 150, 30);
         this.leftLanTypeLab.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.wordsEditPanel.add(this.leftLanTypeLab);
+        this.headerCenterPanel.add(this.leftLanTypeLab);
         
         this.leftLanLab.setFont(new Font("Dialog", 1, 14));
         this.leftLanLab.setBounds(this.frameWidth/2 - 300, 30, 150, 30);
         this.leftLanLab.setHorizontalAlignment(SwingConstants.RIGHT);
-        this.wordsEditPanel.add(this.leftLanLab);
+        this.headerCenterPanel.add(this.leftLanLab);
         
         this.rightLanTypeLab = new JLabel();
         this.rightLanLab = new JLabel();
         
-        if (selectedSideOpt.equals("left")){
+        if (this.targetSide.equals("left")){
+            this.leftLanTypeLab.setText("Target language:");
+            this.leftLanLab.setText(this.targetLanguage);
             this.rightLanTypeLab.setText("Source language:");
             this.rightLanLab.setText(this.srcLanguage);
         }
         else {
+            this.leftLanTypeLab.setText("Source Language:");
+            this.leftLanLab.setText(this.srcLanguage);
             this.rightLanTypeLab.setText("Target Language:");
             this.rightLanLab.setText(this.targetLanguage);
         }
@@ -238,15 +244,159 @@ public class WordsSetDefEdit extends JFrame {
         this.rightLanTypeLab.setFont(new Font("Dialog", 1, 14));
         this.rightLanTypeLab.setBounds(this.frameWidth/2 + 100, 10, 150, 30);
         this.rightLanTypeLab.setHorizontalAlignment(SwingConstants.LEFT);
-        this.wordsEditPanel.add(this.rightLanTypeLab);
+        this.headerCenterPanel.add(this.rightLanTypeLab);
         
         this.rightLanLab.setFont(new Font("Dialog", 1, 14));
         this.rightLanLab.setBounds(this.frameWidth/2 + 150, 30, 150, 30);
         this.rightLanLab.setHorizontalAlignment(SwingConstants.LEFT);
-        this.wordsEditPanel.add(this.rightLanLab);
+        this.headerCenterPanel.add(this.rightLanLab);
         
-        this.wordsEditPanel.revalidate();
-        this.wordsEditPanel.repaint();
+        this.headerCenterPanel.setBounds(0, 0, 770, 60);
+        this.centerPanel.add(this.headerCenterPanel);
+        
+        this.initFieldsCenterPanel();
+    }
+    
+    private void updateHeaderCenterPanel() {
+    
+        System.out.println("Update header...");
+        
+        if (this.targetSide.equals("left")){
+            this.leftLanTypeLab.setText("Target language:");
+            this.rightLanTypeLab.setText("Source language:");
+            this.leftLanLab.setText(this.targetLanguage);
+            this.rightLanLab.setText(this.srcLanguage);
+        }
+        else if (this.targetSide.equals("right")) {
+            this.leftLanTypeLab.setText("Source Language:");
+            this.rightLanTypeLab.setText("Target Language:");
+            this.leftLanLab.setText(this.srcLanguage);
+            this.rightLanLab.setText(this.targetLanguage);
+        }
+    
+    }
+    
+    private void initFieldsCenterPanel() {
+
+        // TODO Check if other layout is possible to not stretch cells or move 
+        // to the middle
+        this.wordsEditPanel = new JPanel(null);
+        
+        int initRepetition = 8; // def 8
+        this.position = 60;
+        
+        for (int i = 0; i < initRepetition; i++) {
+            
+            TextField srcWord = new TextField(srcLanguage, currRowIdx, this.srcSide);
+            TextField targetWord = new TextField(targetLanguage, currRowIdx, 
+                                                 this.targetSide);
+
+            srcWord.setFont(new Font("Dialog", 1, 12));
+            
+            //word1.setText("word1");
+            srcWord.setHorizontalAlignment(SwingConstants.LEFT);
+            srcWord.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent evt) {
+                    textFieldAction(evt);
+                }
+            });
+
+            targetWord.setFont(new Font("Dialog", 1, 12));
+            
+            if (this.targetSide.equals("left")){
+                targetWord.setBounds(50, this.position, 300, 28);
+                srcWord.setBounds(410, this.position, 300, 28);
+            } 
+            else if (this.targetSide.equals("right")) {
+                srcWord.setBounds(50, this.position, 300, 28);
+                targetWord.setBounds(410, this.position, 300, 28);
+            }
+            
+            //word2.setText("word2");
+            targetWord.setHorizontalAlignment(SwingConstants.LEFT);
+            targetWord.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent evt) {
+                    textFieldAction(evt);
+                }
+            });
+
+            this.srcWordFields.add(srcWord);
+            this.targetWordFields.add(targetWord);
+            
+            //System.out.println(this.position);
+            
+            this.position += this.wordsGap;
+            this.currRowIdx += 1;
+
+            this.wordsEditPanel.add(srcWord);
+            this.wordsEditPanel.add(targetWord);
+        
+        }
+        
+        // TODO Change preferred size if new field has been added
+//        this.wordsEditPanel.setPreferredSize(new Dimension(770, 3000));
+//        this.wordsEditPanel.setPreferredSize(new Dimension(770, 1000));
+        this.wordsEditPanel.setBounds(0, 0, 770, 400);
+        this.centerPanel.add(this.wordsEditPanel);
+    }
+    
+    private void updateFieldsCenterPanelSwapSides() {
+        
+        this.position = 60;
+        boolean isTargetOnLeft = this.targetSide.equals("left");
+        
+        for (int i = 0; i < srcWordFields.size(); i++) {
+        
+            if (isTargetOnLeft) {
+                
+                TextField targetWord = this.targetWordFields.get(i);
+                targetWord.setBounds(50, this.position, 300, 28);
+                
+                TextField srcWord = this.srcWordFields.get(i);
+                srcWord.setBounds(410, this.position, 300, 28);
+            }
+            else {
+            
+                TextField srcWord = this.srcWordFields.get(i);
+                srcWord.setBounds(50, this.position, 300, 28);
+                
+                TextField targetWord = this.targetWordFields.get(i);
+                targetWord.setBounds(410, this.position, 300, 28);
+            
+            }
+            
+            this.position += this.wordsGap;
+        }
+        
+    }
+    
+    private void updateFieldsCentralPanelLanguages() {
+        
+         for (int i = 0; i < srcWordFields.size(); i++) {
+
+            TextField targetWord = this.targetWordFields.get(i);
+            String prevTargetWord = targetWord.getText();
+
+            TextField srcWord = this.srcWordFields.get(i);
+            String prevSrcWord = srcWord.getText();
+            
+            // Swapping languages after languages update
+            targetWord.setText(prevSrcWord);
+            targetWord.language = this.targetLanguage;
+            
+            srcWord.setText(prevTargetWord);
+            srcWord.language = this.srcLanguage;
+            
+        }
+    
+    }
+    
+    private void textFieldAction(FocusEvent evt) {
+    
+        TextField txtField = (TextField) evt.getSource();
+        System.out.println(txtField.getText());
     
     }
 
@@ -306,24 +456,37 @@ public class WordsSetDefEdit extends JFrame {
     
     private class TextField extends JTextField {
     
-        TextField(String language, int row) {
+        TextField(String language, int row, String side) {
         
             super();
             this.language = language;
             this.row = row;
+            this.currSide = side;
             
         }
         
         protected String language;
         protected int row;
+        protected String currSide;
     
     }
     
     private String setName;
     private boolean isEditMode;
     private String srcLanguage, targetLanguage;
+    private int currRowIdx = 0;
+    private int position;
+    private final int wordsGap = 40;
+    private String targetSide;
+    private String srcSide;
     
-    private JPanel upperPanel, wordsEditPanel, lowerPanel;
+    private ArrayList<TextField> srcWordFields = new ArrayList<>();
+    private ArrayList<TextField> targetWordFields = new ArrayList<>();
+//    private ArrayList<String> words1 = new ArrayList<>();
+//    private ArrayList<String> words2 = new ArrayList<>();
+    
+    private JPanel upperPanel, centerPanel, lowerPanel, headerCenterPanel, 
+            wordsEditPanel;
     private JScrollPane centerScrollPanel;
     
     private JLabel enterWordsForSetLab, setNameLab, targetLanLab, targetLanLocationLab, 
