@@ -20,6 +20,8 @@ import javax.swing.*;
  */
 public class WordsSets extends JFrame {
     
+    // TODO deafultSrcLanguage, defaultTargetLanguage based on category name,
+    // remove presCategories - get data from DB
     public WordsSets(String categoryName, String srcLanguage, 
                      String targetLanguage, ArrayList<String> presCategories) {
         this.categoryName = categoryName;
@@ -383,43 +385,11 @@ public class WordsSets extends JFrame {
     
     private void addSetButtActionPerformed(ActionEvent evt) {
     
-        WordsSetDefEdit wordsSetDefEdit = new WordsSetDefEdit(this.srcLanguage, 
-                                          this.targetLanguage);
+        WordsSetDefEdit wordsSetDefEdit = new WordsSetDefEdit(this, this.srcLanguage, 
+                                          this.targetLanguage, this.categoryName);
         wordsSetDefEdit.setLocationRelativeTo(this);
         this.dispose();
         wordsSetDefEdit.setVisible(true);
-        
-//        String message = "Please, enter set name:";
-//        String setName = JOptionPane.showInputDialog(this, message);
-//        
-//        if (setName != null) {
-//            
-//            if (this.presSets.contains(setName)) {
-//                message = "Set " + setName + " already exists!";
-//                JOptionPane.showMessageDialog(this, message, "Warning", 
-//                                              JOptionPane.WARNING_MESSAGE);
-//            }
-//            else {
-//                // If setName list is empty update setName field in database
-//                // Means - first set in category
-//                if (this.organizedData.isEmpty()) {
-//                    String sql = String.format("UPDATE setup SET setName = \'%s\' "
-//                            + "WHERE "
-//                            + "category = \'%s\'", setName, this.categoryName);
-//                    this.database.updateRecords(sql);
-//                }
-//                // If not empty add new record
-//                else {
-//                    this.database.insertToSetup(this.categoryName, setName, 
-//                                                this.srcLanguage, this.targetLanguage);
-//                }
-//                
-//                this.getDataFromDatabase();
-//                this.drawBoxes();
-//            }
-//
-//        }
-        
     }
     
     private void goBackButtActionPerformed(ActionEvent evt) {

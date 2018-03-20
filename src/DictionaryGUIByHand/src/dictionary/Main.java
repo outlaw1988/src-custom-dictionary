@@ -164,7 +164,7 @@ public class Main extends JFrame {
             // Languages
             if (this.organizedData.get(i).get("language1") != null) {
             
-                JLabel lanLabel = new JLabel(srcLanguage + " -> " + targetLanguage);
+                JLabel lanLabel = new JLabel(srcLanguage + " <-> " + targetLanguage);
                 
                 lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
                 lanLabel.setBounds(0, 80, 200, 15);
@@ -303,7 +303,6 @@ public class Main extends JFrame {
     
     private void editItemClicked(ActionEvent evt) {
     
-        System.out.println("Edit clicked, action perfomed...");
         //System.out.println(((Box)((JLabel)((JPopupMenu)((JMenuItem)evt.getSource()).getParent()).getInvoker()).getParent()).categoryId);
         String categoryName = ((MenuItem)evt.getSource()).categoryName;
         String srcLanguage = ((MenuItem)evt.getSource()).srcLanguage;

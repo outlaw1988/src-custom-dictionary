@@ -17,15 +17,16 @@ public class DataBase {
     public static void createNewTable() {
     
         // Connection string
-        String url = "jdbc:sqlite:sqlite/database2.db";
+        String url = "jdbc:sqlite:sqlite/database3.db";
         
         // SQL statements
         String sql = "CREATE TABLE IF NOT EXISTS setup (\n"
                 + " id integer PRIMARY KEY,\n"
                 + " category text NOT NULL,\n"
                 + " setName text,\n"
-                + " language1 text,\n"
-                + " language2 text,\n"
+                + " srcLanguage text,\n"
+                + " targetLanguage text,\n"
+                + " targetSide text,\n"
                 + " lastResult integer,\n"
                 + " bestResult integer\n"
                 + ");";
@@ -34,8 +35,8 @@ public class DataBase {
                 + " id integer PRIMARY KEY,\n"
                 + " category text NOT NULL,\n"
                 + " setName text,\n"
-                + " word1 text,\n"
-                + " word2 text\n"
+                + " srcWord text,\n"
+                + " targetWord text\n"
                 + ");";
         
         try (Connection conn = DriverManager.getConnection(url); 
@@ -52,7 +53,7 @@ public class DataBase {
     
     private Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:sqlite/database2.db";
+        String url = "jdbc:sqlite:sqlite/database3.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -120,37 +121,41 @@ public class DataBase {
         }
     }
     
-    public void insertToWord(String category, String setName, String word1, 
-                             String word2) {
-        String sql = "INSERT INTO words(category,setName,word1,word2) VALUES(?,?,?,?)";
+    public void insertToWord(String category, String setName, String srcWord, 
+                             String targetWord) {
+        
+        String sql = "INSERT INTO words(category,setName,srcWord,targetWord) "
+                   + "VALUES(?,?,?,?)";
  
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, category);
             pstmt.setString(2, setName);
-            pstmt.setString(3, word1);
-            pstmt.setString(4, word2);
+            pstmt.setString(3, srcWord);
+            pstmt.setString(4, targetWord);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
     
-    public void insertToSetup(String category, String setName, String language1, 
-                              String language2) {
+    // Use it as initialization
+    public void insertToSetup(String category, String setName, String srcLanguage, 
+                              String targetLanguage, String targetSide) {
         
-        String sql = "INSERT INTO setup(category,setName,language1,language2,"
-                + "lastResult,bestResult) VALUES(?,?,?,?,?,?)";
+        String sql = "INSERT INTO setup(category,setName,srcLanguage,targetLanguage,"
+                + "targetSide,lastResult,bestResult) VALUES(?,?,?,?,?,?,?)";
  
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, category);
             pstmt.setString(2, setName);
-            pstmt.setString(3, language1);
-            pstmt.setString(4, language2);
+            pstmt.setString(3, srcLanguage);
+            pstmt.setString(4, targetLanguage);
+            pstmt.setString(5, targetSide);
             // add zeros as result in initialization
-            pstmt.setInt(5, 0);
             pstmt.setInt(6, 0);
+            pstmt.setInt(7, 0);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
