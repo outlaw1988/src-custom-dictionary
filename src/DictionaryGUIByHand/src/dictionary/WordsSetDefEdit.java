@@ -32,12 +32,13 @@ public class WordsSetDefEdit extends JFrame {
     // Edit mode
     public WordsSetDefEdit(String categoryName, String setName) {
     
+        this.categoryName = categoryName;
         this.setName = setName;
         this.isEditMode = true;
+        this.getDataFromDatabase();
         initComponents();
     }
     
-    @SuppressWarnings("empty-statement")
     private void initComponents() {
     
         // TODO make global config with these parameters
@@ -73,6 +74,7 @@ public class WordsSetDefEdit extends JFrame {
         this.setNameField = new JTextField();
         this.setNameField.setFont(new Font("Dialog", 1, 14));
         this.setNameField.setBounds(frameWidth/2 + 10, 40, 150, 30);
+        if (this.isEditMode) this.setNameField.setText(this.setName);
         this.upperPanel.add(this.setNameField);
         
         this.targetLanLab = new JLabel("Target language:");
@@ -87,9 +89,8 @@ public class WordsSetDefEdit extends JFrame {
                                        .get("defTargetLanguage");
         }
         else {
-            // TODO get from DB
-            this.srcLanguage = "X";
-            this.targetLanguage = "Y";
+            this.srcLanguage = (String)this.setupData.get(0).get("srcLanguage");
+            this.targetLanguage = (String)this.setupData.get(0).get("targetLanguage");
         }
         
         String[] optionsTargetLan = {this.targetLanguage, this.srcLanguage};
@@ -119,9 +120,9 @@ public class WordsSetDefEdit extends JFrame {
             else this.srcSide = "left";
         }
         else {
-            // TODO get from DB
-            this.targetSide = "X";
-            this.srcSide = "Y";
+            this.targetSide = (String)this.setupData.get(0).get("targetSide");;
+            if (this.targetSide.equals("left")) this.srcSide = "right";
+            else this.srcSide = "left";
         }
         
         String[] optionsSide = {this.targetSide, this.srcSide};
@@ -220,6 +221,18 @@ public class WordsSetDefEdit extends JFrame {
         
     }
     
+    private void getDataFromDatabase() {
+    
+        this.database = new DataBase();
+        String sqlCommand = String.format("SELECT * FROM setup WHERE category = \'%s\'"
+                + " AND setName = \'%s\'", this.categoryName, this.setName);
+        this.setupData = this.database.getData(sqlCommand);
+        
+        sqlCommand = String.format("SELECT * FROM words WHERE category = \'%s\'"
+                + " AND setName = \'%s\'", this.categoryName, this.setName);
+        this.wordsData = this.database.getData(sqlCommand);
+    }
+    
     private void determSides() {
     
         this.targetSide = this.targetLanLocationCombo.getSelectedItem().toString();
@@ -282,6 +295,9 @@ public class WordsSetDefEdit extends JFrame {
         this.centerPanel.add(this.headerCenterPanel);
         
         this.initFieldsCenterPanel();
+        
+        // Edit mode - fill with words
+        if (this.isEditMode) this.makeFieldsAndFill();
     }
     
     private void updateHeaderCenterPanel() {
@@ -307,16 +323,34 @@ public class WordsSetDefEdit extends JFrame {
         // to the middle
         this.wordsEditPanel = new JPanel(null);
         
-        int initRepetition = 8; // def 8
         this.position = 60;
         
-        for (int i = 0; i < initRepetition; i++) {
+        for (int i = 0; i < this.initFieldsNum; i++) {
             
             this.addNewWord();
         }
         
         this.wordsEditPanel.setBounds(0, 0, 770, this.centerPanHeight);
         this.centerPanel.add(this.wordsEditPanel);
+    }
+    
+    private void makeFieldsAndFill() {
+    
+        int fieldsToDraw = this.wordsData.size() - this.initFieldsNum;
+
+        for (int i = 0; i < fieldsToDraw; i++) {
+            
+            this.addNewWord();
+        }
+
+        for (int i = 0; i < this.wordsData.size(); i++) {
+        
+            TextField srcWord = this.srcWordFields.get(i);
+            srcWord.setText((String)this.wordsData.get(i).get("srcWord"));
+            
+            TextField targetWord = this.targetWordFields.get(i);
+            targetWord.setText((String)this.wordsData.get(i).get("targetWord"));
+        }
     }
     
     private void addNewWord() {
@@ -348,7 +382,21 @@ public class WordsSetDefEdit extends JFrame {
 
         this.wordsEditPanel.add(srcWord);
         this.wordsEditPanel.add(targetWord);
+        
+        if (this.currRowIdx > 8) expandAndReDrawCenterPanel();
+    }
     
+    private void expandAndReDrawCenterPanel() {
+    
+        this.centerPanHeight += 40;
+        this.wordsEditPanel.setBounds(0, 0, 770, this.centerPanHeight);
+        this.centerPanel.setPreferredSize(new Dimension(this.frameWidth, 
+                                                        this.centerPanHeight));
+        
+        this.wordsEditPanel.revalidate();
+        this.wordsEditPanel.repaint();
+        this.centerPanel.revalidate();
+        this.centerPanel.repaint();
     }
     
     private void updateFieldsCenterPanelSwapSides() {
@@ -401,24 +449,8 @@ public class WordsSetDefEdit extends JFrame {
     
     }
     
-    private void dbOperationsForEditMode() {
+    private void insertWordsToDatabase() {
     
-        // TODO Update setup fields
-        
-        // Useless for new set, obligatory for edit mode
-        String sqlCommand = String.format("DELETE from words WHERE category "
-                    + "= \'%s\' AND setName = \'%s\'", this.categoryName, setName);
-        this.database.removeRecords(sqlCommand);
-    
-    }
-    
-    private void dbOperationsForNewSetMode() {
-    
-        System.out.println("DB operations for new set...");
-        
-        this.database.insertToSetup(this.categoryName, this.setName, this.srcLanguage, 
-                                    this.targetLanguage, this.targetSide);
-        
         for (int i = 0; i < this.srcWordFields.size(); i++) {
         
             String srcWord = this.srcWordFields.get(i).getText();
@@ -429,6 +461,32 @@ public class WordsSetDefEdit extends JFrame {
             this.database.insertToWord(this.categoryName, this.setName, 
                                        srcWord, targetWord);
         }
+    
+    }
+    
+    private void dbOperationsForEditMode() {
+    
+        String sqlCommand = String.format("UPDATE setup SET setName = \'%s\'"
+                    + ", srcLanguage = \'%s\', targetLanguage = \'%s\'"
+                    + ", targetSide = \'%s\'"
+                    + " WHERE category = \'%s\' AND setName = \'%s\'", this.setName,
+                    this.srcLanguage, this.targetLanguage, this.targetSide,
+                    this.categoryName, this.prevSetName);
+        this.database.updateRecords(sqlCommand);
+        
+        sqlCommand = String.format("DELETE from words WHERE category "
+                    + "= \'%s\' AND setName = \'%s\'", this.categoryName, this.setName);
+        this.database.removeRecords(sqlCommand);
+        
+        this.insertWordsToDatabase();
+    }
+    
+    private void dbOperationsForNewSetMode() {
+        
+        this.database.insertToSetup(this.categoryName, this.setName, this.srcLanguage, 
+                                    this.targetLanguage, this.targetSide);
+        
+        this.insertWordsToDatabase();
     }
     
     private void showWordsSetsScreen() {
@@ -441,23 +499,23 @@ public class WordsSetDefEdit extends JFrame {
 
     private void cancelButtActionPerformed(ActionEvent evt) {
     
-        // TODO add dialog window
-        this.showWordsSetsScreen();
+        String message = "Are you sure you want to cancel editing?"
+                       + "\nUnsaved changes will be discarded.";
+        
+        int dialogResult = JOptionPane.showConfirmDialog(this, 
+                message, "Warning", JOptionPane.YES_NO_OPTION, 
+                JOptionPane.WARNING_MESSAGE);
+        
+        if(dialogResult == JOptionPane.YES_OPTION){
+            
+            this.showWordsSetsScreen();
+        }
+
     }
     
     private void addWordButtActionPerformed(ActionEvent evt) {
         
         this.addNewWord();
-        
-        this.centerPanHeight += 40;
-        this.wordsEditPanel.setBounds(0, 0, 770, this.centerPanHeight);
-        this.centerPanel.setPreferredSize(new Dimension(this.frameWidth, 
-                                                        this.centerPanHeight));
-        
-        this.wordsEditPanel.revalidate();
-        this.wordsEditPanel.repaint();
-        this.centerPanel.revalidate();
-        this.centerPanel.repaint();
     }
     
     // TODO Next feature
@@ -469,8 +527,9 @@ public class WordsSetDefEdit extends JFrame {
     
     private void confirmButtActionPerformed(ActionEvent evt) {
     
-        // TODO Confirm pushed
-        // Insert or update - if edit mode
+        if (isEditMode) this.prevSetName = this.setName;
+        else this.prevSetName = null;
+        
         this.setName = this.setNameField.getText();
         database = new DataBase();
         
@@ -478,7 +537,9 @@ public class WordsSetDefEdit extends JFrame {
                     + "WHERE category = \'%s\' AND setName = \'%s\'", this.categoryName, 
                     this.setName);
         
-        if (this.database.countRecords(sqlComm) != 0) {
+        // check in edit mode - provided setName != previous setName
+        if (this.database.countRecords(sqlComm) != 0 && !this.setName.
+            equals(this.prevSetName)) {
             String message = "Set " + this.setName + " for category " + this.categoryName + 
                              " already exists!";
             JOptionPane.showMessageDialog(this, message, "Warning", 
@@ -553,17 +614,22 @@ public class WordsSetDefEdit extends JFrame {
     }
     
     private String setName;
-    private String categoryName;
+    private String prevSetName;
+    private final String categoryName;
     private final boolean isEditMode;
     private String srcLanguage, targetLanguage;
     private int currRowIdx = 0;
     private int position;
     private final int wordsGap = 40;
-    private String targetSide; // TODO add to DB
+    private String targetSide;
     private String srcSide;
     private int centerPanHeight = 375;
+    private final int initFieldsNum = 8;
     private DataBase database;
+    
     private java.util.List<Map<String, String>> defaultSettings;
+    private java.util.List<Map<String, Object>> setupData;
+    private java.util.List<Map<String, Object>> wordsData;
     
     private ArrayList<TextField> srcWordFields = new ArrayList<>();
     private ArrayList<TextField> targetWordFields = new ArrayList<>();
@@ -576,7 +642,7 @@ public class WordsSetDefEdit extends JFrame {
             leftLanTypeLab, rightLanTypeLab, leftLanLab, rightLanLab;
     private JTextField setNameField;
     private JComboBox targetLanCombo, targetLanLocationCombo;
-    private JButton cancelButt, addWordButt, saveButt, confirmButt;
+    private JButton cancelButt, addWordButt, confirmButt;
     
     private int frameWidth, frameHeight;
     

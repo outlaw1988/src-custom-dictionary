@@ -222,7 +222,7 @@ public class WordsSets extends JFrame {
         editItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Edit clicked...");
+                editItemClicked(e);
             }
         });
         
@@ -337,13 +337,30 @@ public class WordsSets extends JFrame {
     private void renameSetClicked(ActionEvent evt) {
     
         String setClicked = ((MenuItem)evt.getSource()).setName;
-        
+       
         String message = "Please, enter set name:";
         String setName = JOptionPane.showInputDialog(this, message, setClicked);
         
-        if (setName != null && !setName.equals(setClicked)) {
+        String sqlCommand = String.format("SELECT COUNT(*) AS rowcount FROM setup "
+                    + "WHERE category = \'%s\' AND setName = \'%s\'", this.categoryName, 
+                    setName);
         
-            String sqlCommand = String.format("UPDATE setup SET setName = \'%s\'"
+        if (setName.equals("")) {
+            String messageEmpty = "Set name is empty!";
+            JOptionPane.showMessageDialog(this, messageEmpty, "Warning", 
+                                          JOptionPane.WARNING_MESSAGE);
+            
+        }
+        else if (this.database.countRecords(sqlCommand) != 0 && 
+                !setName.equals(setClicked)) {
+            String messageExst = "Set " + setName + " for category " + 
+                                this.categoryName + " already exists!";
+            JOptionPane.showMessageDialog(this, messageExst, "Warning", 
+                                JOptionPane.WARNING_MESSAGE);
+        }
+        else {
+        
+            sqlCommand = String.format("UPDATE setup SET setName = \'%s\'"
                     + " WHERE category = \'%s\' AND setName = \'%s\'", setName, 
                     this.categoryName, setClicked);
             
@@ -358,7 +375,7 @@ public class WordsSets extends JFrame {
             this.getDataFromDatabase();
             this.drawBoxes();
         }
-    
+
     }
     
     private void removeIconClicked(ActionEvent evt) {
@@ -387,6 +404,16 @@ public class WordsSets extends JFrame {
             this.getDataFromDatabase();
             this.drawBoxes();
         }
+    }
+    
+    private void editItemClicked(ActionEvent evt) {
+    
+        String setName = ((MenuItem)evt.getSource()).setName;
+                
+        WordsSetDefEdit editScreen = new WordsSetDefEdit(categoryName, setName);
+        editScreen.setLocationRelativeTo(this);
+        this.dispose();
+        editScreen.setVisible(true);
     }
     
     private void boxClicked(MouseEvent me) {
@@ -463,9 +490,6 @@ public class WordsSets extends JFrame {
         }
         
         protected String setName;
-        // TODO Use if necessary
-//        protected String srcLanguage;
-//        protected String targetLanguage;
     
     }
     
