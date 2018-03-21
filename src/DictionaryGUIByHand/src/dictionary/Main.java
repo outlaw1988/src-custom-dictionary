@@ -97,8 +97,10 @@ public class Main extends JFrame {
             if ((i % boxInRow) == 0) gc.gridy = gridy++;
             
             String category = (String)this.organizedData.get(i).get("category");
-            String srcLanguage = (String)this.organizedData.get(i).get("language1");
-            String targetLanguage = (String)this.organizedData.get(i).get("language2");
+            String srcLanguage = (String)this.organizedData.get(i).get("defSrcLanguage");
+            String targetLanguage = (String)this.organizedData.get(i).
+                                    get("defTargetLanguage");
+            String targetSide = (String)this.organizedData.get(i).get("defTargetSide");
             
             Box box = new Box(category, srcLanguage, targetLanguage);
             box.setLayout(null);
@@ -155,21 +157,19 @@ public class Main extends JFrame {
 
             dotsLab.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    popUpMenuAction(e, category, srcLanguage, targetLanguage);
+                    popUpMenuAction(e, category, srcLanguage, targetLanguage, 
+                                    targetSide);
                 }
             });
             
             box.add(dotsLab);
             
-            // Languages
-            if (this.organizedData.get(i).get("language1") != null) {
-            
-                JLabel lanLabel = new JLabel(srcLanguage + " <-> " + targetLanguage);
-                
-                lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                lanLabel.setBounds(0, 80, 200, 15);
-                box.add(lanLabel);
-            }
+            JLabel lanLabel = new JLabel(srcLanguage + " <-> " + targetLanguage);
+
+            lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            lanLabel.setBounds(0, 80, 200, 15);
+            box.add(lanLabel);
+
             
             this.boxes.add(box);
             this.categoryPanel.add(box, gc);
@@ -183,7 +183,7 @@ public class Main extends JFrame {
     private void getDataFromDatabase() {
     
         this.database = new DataBase();
-        String sqlCommand = "SELECT * FROM setup";
+        String sqlCommand = "SELECT * FROM setup WHERE setName IS NULL";
         this.setupData = this.database.getData(sqlCommand);
         this.createOrganizedData();
         
@@ -199,8 +199,7 @@ public class Main extends JFrame {
             row = new HashMap<>();
             String category = (String)this.setupData.get(i).get("category");
             
-            if (this.presCategories.contains(category)) continue;
-            else this.presCategories.add(category);
+            presCategories.add(category);
             
             row.put("category", category);
 
@@ -212,8 +211,10 @@ public class Main extends JFrame {
                     + "WHERE category = \'%s\' AND setName IS NOT NULL", category);
             row.put("wordsNum", this.database.countRecords(sqlCommWordsNum));
 
-            row.put("language1", (String)this.setupData.get(i).get("language1"));
-            row.put("language2", (String)this.setupData.get(i).get("language2"));
+            row.put("defSrcLanguage", (String)this.setupData.get(i).get("srcLanguage"));
+            row.put("defTargetLanguage", (String)this.setupData.get(i).
+                                         get("targetLanguage"));
+            row.put("defTargetSide", (String)this.setupData.get(i).get("targetSide"));
             this.organizedData.add(row);
         }
     }
@@ -221,11 +222,10 @@ public class Main extends JFrame {
     private void boxClicked(MouseEvent me) {
     
         String categoryClicked = ((Box)(me.getSource())).categoryId;
-        String srcLanguage = ((Box)(me.getSource())).srcLanguage;
-        String targetLanguage = ((Box)(me.getSource())).targetLanguage;
+//        String srcLanguage = ((Box)(me.getSource())).srcLanguage;
+//        String targetLanguage = ((Box)(me.getSource())).targetLanguage;
         
-        WordsSets wordsSetsScreen = new WordsSets(categoryClicked, srcLanguage, 
-                                                  targetLanguage, this.presCategories);
+        WordsSets wordsSetsScreen = new WordsSets(categoryClicked);
         wordsSetsScreen.setLocationRelativeTo(this);
         this.dispose();
         wordsSetsScreen.setVisible(true);
@@ -259,22 +259,13 @@ public class Main extends JFrame {
     }
     
     private void popUpMenuAction(MouseEvent evt, String categoryName, 
-                                 String srcLanguage, String targetLanguage){
+                                 String srcLanguage, String targetLanguage, 
+                                 String targetSide){
     
         this.menu = new JPopupMenu();
         
-//        JMenuItem renameItem = new MenuItem(categoryName, srcLanguage, 
-//                                            targetLanguage);
-//        renameItem.setText("rename");
-//        renameItem.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                System.out.println("Rename clicked...");
-//            }
-//        });
-        
         JMenuItem removeItem = new MenuItem(categoryName, srcLanguage, 
-                                            targetLanguage);
+                                            targetLanguage, targetSide);
         removeItem.setText("remove");
         removeItem.addActionListener(new ActionListener() {
             @Override
@@ -284,7 +275,7 @@ public class Main extends JFrame {
         });
         
         JMenuItem editItem = new MenuItem(categoryName, srcLanguage, 
-                                          targetLanguage);
+                                          targetLanguage, targetSide);
         editItem.setText("edit");
         editItem.addActionListener(new ActionListener() {
             @Override
@@ -303,13 +294,13 @@ public class Main extends JFrame {
     
     private void editItemClicked(ActionEvent evt) {
     
-        //System.out.println(((Box)((JLabel)((JPopupMenu)((JMenuItem)evt.getSource()).getParent()).getInvoker()).getParent()).categoryId);
         String categoryName = ((MenuItem)evt.getSource()).categoryName;
         String srcLanguage = ((MenuItem)evt.getSource()).srcLanguage;
         String targetLanguage = ((MenuItem)evt.getSource()).targetLanguage;
+        String targetSide = ((MenuItem)evt.getSource()).targetSide;
         
         CategoryEdit newCat = new CategoryEdit(categoryName, srcLanguage, 
-                                               targetLanguage);
+                                               targetLanguage, targetSide);
         newCat.setLocationRelativeTo(this);
         this.dispose();
         newCat.setVisible(true);
@@ -370,16 +361,18 @@ public class Main extends JFrame {
     private class MenuItem extends JMenuItem {
     
         public MenuItem(String categoryName, String srcLanguage, 
-                        String targetLanguage) {
+                        String targetLanguage, String targetSide) {
             super();
             this.categoryName = categoryName;
             this.srcLanguage = srcLanguage;
             this.targetLanguage = targetLanguage;
+            this.targetSide = targetSide;
         }
         
         protected String categoryName;
         protected String srcLanguage;
         protected String targetLanguage;
+        protected String targetSide;
     
     } 
     

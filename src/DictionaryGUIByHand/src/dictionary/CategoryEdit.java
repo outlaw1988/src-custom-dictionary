@@ -23,12 +23,13 @@ public class CategoryEdit extends Main {
     }
     
     public CategoryEdit(String categoryName, String srcLanguage, 
-                        String targetLanguage) {
+                        String targetLanguage, String targetSide) {
     
         this.editMode = true;
         this.initCategoryName = categoryName;
         this.srcLanguage = srcLanguage;
         this.targetLanguage = targetLanguage;
+        this.targetSide = targetSide;
         initComponents();
         
     }
@@ -39,13 +40,10 @@ public class CategoryEdit extends Main {
         int frameWidth = 770;
         int frameHeight = 550;
     
-        //this.upperPanel.removeAll();
         this.categoryPanel.removeAll();
-        //this.centerScrollPanel.removeAll();
         this.lowerPanel.removeAll();
         
         // Central panel
-        //this.categoryPanel = new JPanel();
         this.categoryPanel.setLayout(null);
         
         this.catNameLab = new JLabel("Category name:");
@@ -98,6 +96,20 @@ public class CategoryEdit extends Main {
         
         this.targetLanBox.setBounds(frameWidth/2 + 10, 130, 150, 30);
         this.categoryPanel.add(this.targetLanBox);
+        
+        this.defTargetSideLab = new JLabel("Default target language side:");
+        this.defTargetSideLab.setFont(new Font("Dialog", 1, 14));
+        this.defTargetSideLab.setBounds(frameWidth/2 - 300, 170, 300, 30);
+        this.defTargetSideLab.setHorizontalAlignment(SwingConstants.RIGHT);
+        this.categoryPanel.add(this.defTargetSideLab);
+        
+        String[] sideOptions = {"left", "right"};
+        this.defTargetSideBox = new JComboBox(sideOptions);
+        this.defTargetSideBox.setFont(new Font("Dialog", 1, 14));
+        this.defTargetSideBox.setBounds(frameWidth/2 + 10, 170, 150, 30);
+        if (this.editMode) this.defTargetSideBox.setSelectedItem(this.targetSide);
+        this.categoryPanel.add(this.defTargetSideBox);
+        
         // Central panel end
 
         // Lower panel
@@ -163,13 +175,17 @@ public class CategoryEdit extends Main {
     
     private void updateOrInsertToDatabase() {
     
+        String chosenDefSrcLan = this.srcLanBox.getSelectedItem().toString();
+        String chosenDefTargetLan = this.targetLanBox.getSelectedItem().toString();
+        String chosenDefTargetSide = this.defTargetSideBox.getSelectedItem().toString();
+        
         if (this.editMode) {
             String sql = String.format("UPDATE setup SET category = \'%s\', "
-                    + "language1 = \'%s\', language2 = \'%s\' WHERE category "
-                    + "= \'%s\'", this.categoryName, this.srcLanBox.getSelectedItem().
-                            toString(), 
-                    this.targetLanBox.getSelectedItem().toString(), 
+                    + "srcLanguage = \'%s\', targetLanguage = \'%s\', targetSide "
+                    + "= \'%s\' WHERE category = \'%s\'", this.categoryName, 
+                    chosenDefSrcLan, chosenDefTargetLan, chosenDefTargetSide,
                     this.initCategoryName);
+            
             this.database.updateRecords(sql);
 
             sql = String.format("UPDATE words SET category = \'%s\'"
@@ -178,9 +194,8 @@ public class CategoryEdit extends Main {
             this.database.updateRecords(sql);
         }
         else {
-            this.database.insertToSetup(categoryName, null, 
-                            this.srcLanBox.getSelectedItem().toString(), 
-                            this.targetLanBox.getSelectedItem().toString());
+            this.database.insertToSetup(categoryName, null, chosenDefSrcLan, 
+                            chosenDefTargetLan, chosenDefTargetSide);
         }
 
         this.showMainScreen();
@@ -200,14 +215,15 @@ public class CategoryEdit extends Main {
     }
     
     private JButton confirmButt, cancelButt;
-    private JLabel catNameLab, srcLanLab, targetLanLab;
+    private JLabel catNameLab, srcLanLab, targetLanLab, defTargetSideLab;
     private JTextField catNameField;
-    private JComboBox srcLanBox, targetLanBox;
+    private JComboBox srcLanBox, targetLanBox, defTargetSideBox;
     
     private String categoryName;
     private String initCategoryName;
     private String srcLanguage;
     private String targetLanguage;
+    private String targetSide;
     private final boolean editMode;
     
 }

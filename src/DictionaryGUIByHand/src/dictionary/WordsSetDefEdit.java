@@ -8,6 +8,8 @@ package dictionary;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.*;
 
 /**
@@ -17,12 +19,10 @@ import javax.swing.*;
 public class WordsSetDefEdit extends JFrame {
     
     // New set mode
-    public WordsSetDefEdit(WordsSets wordsSets, String srcLanguage, String targetLanguage, 
-                           String categoryName) {
+    public WordsSetDefEdit(String categoryName, 
+                        java.util.List<Map<String, String>> defaultSettings) {
     
-        this.wordsSets = wordsSets;
-        this.srcLanguage = srcLanguage;
-        this.targetLanguage = targetLanguage;
+        this.defaultSettings = defaultSettings;
         this.isEditMode = false;
         this.categoryName = categoryName;
         initComponents();
@@ -30,15 +30,14 @@ public class WordsSetDefEdit extends JFrame {
     }
     
     // Edit mode
-    public WordsSetDefEdit(String setName, String srcLanguage, String targetLanguage) {
+    public WordsSetDefEdit(String categoryName, String setName) {
     
         this.setName = setName;
-        this.srcLanguage = srcLanguage;
-        this.targetLanguage = targetLanguage;
         this.isEditMode = true;
         initComponents();
     }
     
+    @SuppressWarnings("empty-statement")
     private void initComponents() {
     
         // TODO make global config with these parameters
@@ -82,8 +81,19 @@ public class WordsSetDefEdit extends JFrame {
         this.targetLanLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.upperPanel.add(this.targetLanLab);
         
-        // Choosing target language
+        if (!this.isEditMode) {
+            this.srcLanguage = this.defaultSettings.get(0).get("defSrcLanguage");
+            this.targetLanguage = this.defaultSettings.get(0)
+                                       .get("defTargetLanguage");
+        }
+        else {
+            // TODO get from DB
+            this.srcLanguage = "X";
+            this.targetLanguage = "Y";
+        }
+        
         String[] optionsTargetLan = {this.targetLanguage, this.srcLanguage};
+        
         this.targetLanCombo = new JComboBox(optionsTargetLan);
         this.targetLanCombo.setFont(new Font("Dialog", 1, 14));
         this.targetLanCombo.setBounds(frameWidth/2 + 10, 80, 150, 30);
@@ -103,8 +113,18 @@ public class WordsSetDefEdit extends JFrame {
         this.targetLanLocationLab.setHorizontalAlignment(SwingConstants.RIGHT);
         this.upperPanel.add(this.targetLanLocationLab);
         
-        // Choosing target side
-        String[] optionsSide = {"left", "right"};
+        if (!this.isEditMode) {
+            this.targetSide = this.defaultSettings.get(0).get("defTargetSide");
+            if (this.targetSide.equals("left")) this.srcSide = "right";
+            else this.srcSide = "left";
+        }
+        else {
+            // TODO get from DB
+            this.targetSide = "X";
+            this.srcSide = "Y";
+        }
+        
+        String[] optionsSide = {this.targetSide, this.srcSide};
         this.targetLanLocationCombo = new JComboBox(optionsSide);
         this.targetLanLocationCombo.setFont(new Font("Dialog", 1, 14));
         this.targetLanLocationCombo.setBounds(frameWidth/2 + 260, 80, 100, 30);
@@ -410,13 +430,19 @@ public class WordsSetDefEdit extends JFrame {
                                        srcWord, targetWord);
         }
     }
+    
+    private void showWordsSetsScreen() {
+    
+        WordsSets wordSetsScreen = new WordsSets(this.categoryName);
+        wordSetsScreen.setLocationRelativeTo(this);
+        this.dispose();
+        wordSetsScreen.setVisible(true);
+    }
 
     private void cancelButtActionPerformed(ActionEvent evt) {
     
         // TODO add dialog window
-        this.wordsSets.setLocationRelativeTo(this);
-        this.dispose();
-        wordsSets.setVisible(true);
+        this.showWordsSetsScreen();
     }
     
     private void addWordButtActionPerformed(ActionEvent evt) {
@@ -469,7 +495,7 @@ public class WordsSetDefEdit extends JFrame {
             else dbOperationsForNewSetMode();
         }
     
-        // TODO - back to prev window
+        this.showWordsSetsScreen();
     }
     
     public static void main(String[] args) {
@@ -493,15 +519,16 @@ public class WordsSetDefEdit extends JFrame {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ArrayList<String> presCats = new ArrayList<>();
-                presCats.add("Family");
-                presCats.add("Cars");
-                presCats.add("Test");
-                WordsSets wordsSetsScreen = new WordsSets("Test4", "Polish", 
-                                                          "English", presCats);
                 
-                WordsSetDefEdit wordsSetDefEditScreen = new WordsSetDefEdit(wordsSetsScreen, "Polish", 
-                                                        "English", "Test4");
+                java.util.List<Map<String, String>> defaultSettings = new ArrayList<>();
+                Map<String, String> row = new HashMap<>();
+                row.put("defSrcLanguage", "Polish");
+                row.put("defTargetLanguage", "English");
+                row.put("defTargetSide", "left");
+                defaultSettings.add(row);
+                
+                WordsSetDefEdit wordsSetDefEditScreen = new WordsSetDefEdit("Test4", 
+                                                        defaultSettings);
                 wordsSetDefEditScreen.setLocationRelativeTo(null);
                 wordsSetDefEditScreen.setVisible(true);
             }
@@ -525,11 +552,9 @@ public class WordsSetDefEdit extends JFrame {
     
     }
     
-    private WordsSets wordsSets;
-    
     private String setName;
     private String categoryName;
-    private boolean isEditMode;
+    private final boolean isEditMode;
     private String srcLanguage, targetLanguage;
     private int currRowIdx = 0;
     private int position;
@@ -538,6 +563,7 @@ public class WordsSetDefEdit extends JFrame {
     private String srcSide;
     private int centerPanHeight = 375;
     private DataBase database;
+    private java.util.List<Map<String, String>> defaultSettings;
     
     private ArrayList<TextField> srcWordFields = new ArrayList<>();
     private ArrayList<TextField> targetWordFields = new ArrayList<>();

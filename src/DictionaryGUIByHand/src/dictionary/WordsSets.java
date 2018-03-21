@@ -21,13 +21,8 @@ import javax.swing.*;
 public class WordsSets extends JFrame {
     
     // TODO deafultSrcLanguage, defaultTargetLanguage based on category name,
-    // remove presCategories - get data from DB
-    public WordsSets(String categoryName, String srcLanguage, 
-                     String targetLanguage, ArrayList<String> presCategories) {
+    public WordsSets(String categoryName) {
         this.categoryName = categoryName;
-        this.srcLanguage = srcLanguage;
-        this.targetLanguage = targetLanguage;
-        this.presCategories = presCategories;
         this.getDataFromDatabase();
         this.initComponents();
     }
@@ -116,6 +111,8 @@ public class WordsSets extends JFrame {
             if ((i % boxInRow) == 0) gc.gridy = gridy++;
             
             String setName = (String)this.organizedData.get(i).get("setName");
+            String srcLanguage = (String)this.organizedData.get(i).get("srcLanguage");
+            String targetLanguage = (String)this.organizedData.get(i).get("targetLanguage");
             SetBox box = new SetBox(setName);
             box.setLayout(null);
             
@@ -146,14 +143,14 @@ public class WordsSets extends JFrame {
             JLabel wordsNumLab = new JLabel("Words number: " + 
                         this.organizedData.get(i).get("wordsNum").toString());
             wordsNumLab.setHorizontalAlignment(SwingConstants.LEFT);
-            wordsNumLab.setBounds(100 - 90, 30, 120, 15);
+            wordsNumLab.setBounds(100 - 90, 25, 120, 15);
             box.add(wordsNumLab);
             
             // change
             JLabel lastResLab = new JLabel("Last result: " + 
                         this.organizedData.get(i).get("lastResult").toString() + "%");
             lastResLab.setHorizontalAlignment(SwingConstants.LEFT);
-            lastResLab.setBounds(100 - 90, 50, 120, 15);
+            lastResLab.setBounds(100 - 90, 42, 120, 15);
             box.add(lastResLab);
             
             // Remove button
@@ -180,8 +177,14 @@ public class WordsSets extends JFrame {
             JLabel bestResLab = new JLabel("Best result: " + 
                         this.organizedData.get(i).get("bestResult").toString() + "%");
             bestResLab.setHorizontalAlignment(SwingConstants.LEFT);
-            bestResLab.setBounds(100 - 90, 70, 200, 15);
+            bestResLab.setBounds(100 - 90, 60, 200, 15);
             box.add(bestResLab);
+            
+            JLabel lanLabel = new JLabel(srcLanguage + " -> " + targetLanguage);
+
+            lanLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            lanLabel.setBounds(0, 80, 200, 15);
+            box.add(lanLabel);
             
             this.setBoxes.add(box);
             this.wordsSetsPanel.add(box, gc);
@@ -256,68 +259,80 @@ public class WordsSets extends JFrame {
     private void createOrganizedData(java.util.List<Map<String, Object>> setupData) {
     
         this.organizedData = new ArrayList<>();
-        Map<String, Object> row;
-        this.presSets = new ArrayList<>();
+        this.defaultSettings = new ArrayList<>();
         
         for (int i = 0; i < setupData.size(); i++) {
+            
+            // Default settings
+            if (setupData.get(i).get("setName") == null) {
+                Map<String, String> row = new HashMap<>();
+                row.put("defSrcLanguage", (String)setupData.get(i).get("srcLanguage"));
+                row.put("defTargetLanguage", (String)setupData.get(i)
+                                             .get("targetLanguage"));
+                row.put("defTargetSide", (String)setupData.get(i).get("targetSide"));
+                
+                this.defaultSettings.add(row);
+            }
+            // Present sets of words
+            else {
+                Map<String, Object> row = new HashMap<>();
+                String setName = (String)setupData.get(i).get("setName");
 
-            if (setupData.get(i).get("setName") == null) break;
-            
-            row = new HashMap<>();
-            String setName = (String)setupData.get(i).get("setName");
-            this.presSets.add(setName);
-            
-            row.put("setName", setName);
-            
-            String sqlCommWordsNum = String.format("SELECT COUNT(*) AS rowcount "
-                    + "FROM words "
-                    + "WHERE category = \'%s\' AND setName = \'%s\'", 
-                    this.categoryName, setName);
-            row.put("wordsNum", this.database.countRecords(sqlCommWordsNum));
+                row.put("setName", setName);
 
-            row.put("lastResult", (int)setupData.get(i).get("lastResult"));
-            row.put("bestResult", (int)setupData.get(i).get("bestResult"));
-            this.organizedData.add(row);
+                String sqlCommWordsNum = String.format("SELECT COUNT(*) AS rowcount "
+                        + "FROM words "
+                        + "WHERE category = \'%s\' AND setName = \'%s\'", 
+                        this.categoryName, setName);
+                row.put("wordsNum", this.database.countRecords(sqlCommWordsNum));
+                row.put("srcLanguage", (String)setupData.get(i).get("srcLanguage"));
+                row.put("targetLanguage", (String)setupData.get(i).get("targetLanguage"));
+                row.put("lastResult", (int)setupData.get(i).get("lastResult"));
+                row.put("bestResult", (int)setupData.get(i).get("bestResult"));
+
+                this.organizedData.add(row);
+            }
+
         }
         
     }
     
     // TODO Currently - not used, requires more work
-    private void changeCategoryClicked(ActionEvent evt) {
-    
-        this.presCategories.remove(this.categoryName);
-        String[] catsToChoose = this.presCategories.toArray(new String[0]);
-        String setClicked = ((MenuItem)evt.getSource()).setName;
-        
-        String message = "Select desired category:";
-        
-        String newCategory = (String)JOptionPane.showInputDialog(
-                                this,
-                                message,
-                                "Select category",
-                                JOptionPane.PLAIN_MESSAGE,
-                                null,
-                                catsToChoose,
-                                null);
-        
-        System.out.println(newCategory);
-        
-        if (newCategory != null) {
-        
-            String sqlCommand = String.format("UPDATE setup SET category = \'%s\'"
-                    + " WHERE category = \'%s\' AND setName = \'%s\'", newCategory, 
-                    this.categoryName, setClicked);
-            this.database.updateRecords(sqlCommand);
-            
-            sqlCommand = String.format("UPDATE words SET category = \'%s\'"
-                    + " WHERE category = \'%s\' AND setName = \'%s\'", newCategory, 
-                    this.categoryName, setClicked);
-            this.database.updateRecords(sqlCommand);
-                        
-            this.getDataFromDatabase();
-            this.drawBoxes();
-        }
-    }
+//    private void changeCategoryClicked(ActionEvent evt) {
+//    
+//        this.presCategories.remove(this.categoryName);
+//        String[] catsToChoose = this.presCategories.toArray(new String[0]);
+//        String setClicked = ((MenuItem)evt.getSource()).setName;
+//        
+//        String message = "Select desired category:";
+//        
+//        String newCategory = (String)JOptionPane.showInputDialog(
+//                                this,
+//                                message,
+//                                "Select category",
+//                                JOptionPane.PLAIN_MESSAGE,
+//                                null,
+//                                catsToChoose,
+//                                null);
+//        
+//        System.out.println(newCategory);
+//        
+//        if (newCategory != null) {
+//        
+//            String sqlCommand = String.format("UPDATE setup SET category = \'%s\'"
+//                    + " WHERE category = \'%s\' AND setName = \'%s\'", newCategory, 
+//                    this.categoryName, setClicked);
+//            this.database.updateRecords(sqlCommand);
+//            
+//            sqlCommand = String.format("UPDATE words SET category = \'%s\'"
+//                    + " WHERE category = \'%s\' AND setName = \'%s\'", newCategory, 
+//                    this.categoryName, setClicked);
+//            this.database.updateRecords(sqlCommand);
+//                        
+//            this.getDataFromDatabase();
+//            this.drawBoxes();
+//        }
+//    }
     
     private void renameSetClicked(ActionEvent evt) {
     
@@ -385,8 +400,8 @@ public class WordsSets extends JFrame {
     
     private void addSetButtActionPerformed(ActionEvent evt) {
     
-        WordsSetDefEdit wordsSetDefEdit = new WordsSetDefEdit(this, this.srcLanguage, 
-                                          this.targetLanguage, this.categoryName);
+        WordsSetDefEdit wordsSetDefEdit = new WordsSetDefEdit(this.categoryName, 
+                                          this.defaultSettings);
         wordsSetDefEdit.setLocationRelativeTo(this);
         this.dispose();
         wordsSetDefEdit.setVisible(true);
@@ -422,12 +437,7 @@ public class WordsSets extends JFrame {
         
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ArrayList<String> presCats = new ArrayList<>();
-                presCats.add("Family");
-                presCats.add("Cars");
-                presCats.add("Test");
-                WordsSets wordsSetsScreen = new WordsSets("Test4", "Polish", 
-                                                          "English", presCats);
+                WordsSets wordsSetsScreen = new WordsSets("Test3");
                 wordsSetsScreen.setLocationRelativeTo(null);
                 wordsSetsScreen.setVisible(true);
             }
@@ -460,13 +470,10 @@ public class WordsSets extends JFrame {
     }
     
     private final String categoryName;
-    private String srcLanguage;
-    private String targetLanguage;
-    private ArrayList<String> presCategories;
     private ArrayList<SetBox> setBoxes;
     private DataBase database;
     private java.util.List<Map<String, Object>> organizedData;
-    private ArrayList<String> presSets;
+    private java.util.List<Map<String, String>> defaultSettings;
     
     private JPanel upperPanel, wordsSetsPanel, lowerPanel;
     private JScrollPane centerScrollPanel;
