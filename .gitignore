@@ -24,3 +24,5 @@ hs_err_pid*
 /src/DictionaryGUI/build/
 /src/DictionaryGUIByHand/nbproject/private/
 /src/DictionaryGUIByHand/build/
+/src/DictionaryGUIByHand/dist/
+/src/DictionaryGUI/src/dictionary/
