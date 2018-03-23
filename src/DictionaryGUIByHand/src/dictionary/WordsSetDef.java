@@ -213,7 +213,7 @@ public class WordsSetDef extends JFrame{
         
         insertToDatabase();
         
-        Exam examScreen = new Exam(this.wordSetName);
+        ExamOld examScreen = new ExamOld(this.wordSetName);
         examScreen.setLocationRelativeTo(null);
         examScreen.setVisible(true);
         this.dispose();

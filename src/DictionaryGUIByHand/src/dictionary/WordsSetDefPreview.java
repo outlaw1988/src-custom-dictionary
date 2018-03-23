@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -34,7 +33,7 @@ public class WordsSetDefPreview extends JFrame {
         this.upperPanel.setPreferredSize(new Dimension(770, 30));
         
         // Main header label
-        this.mainHeaderLab = new JLabel("Category: " + this.categoryName + ", set name: "
+        this.mainHeaderLab = new JLabel("Category: " + this.categoryName + ", set: "
                                         + this.setName);
         this.mainHeaderLab.setFont(new Font("Dialog", 1, 18));
         this.mainHeaderLab.setBounds(0, 0, this.frameWidth, 30);
@@ -90,6 +89,7 @@ public class WordsSetDefPreview extends JFrame {
         this.lowerPanel.add(this.perfExamButt);
         // Bottom panel end
         
+        // Layout
         this.setLayout(new BorderLayout());
         this.add(this.upperPanel, BorderLayout.PAGE_START);
         this.add(this.centerScrollPanel, BorderLayout.CENTER);
@@ -220,8 +220,10 @@ public class WordsSetDefPreview extends JFrame {
     
     private void perfExamButtActionPerformed(ActionEvent evt) {
     
-        System.out.println("Perform exam butt pushed...");
-    
+        Exam examSc = new Exam(this.categoryName, this.setName);
+        examSc.setLocationRelativeTo(this);
+        this.dispose();
+        examSc.setVisible(true);
     }
     
     public static void main(String[] args) {
