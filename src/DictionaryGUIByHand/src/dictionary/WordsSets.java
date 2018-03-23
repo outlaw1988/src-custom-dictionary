@@ -420,9 +420,11 @@ public class WordsSets extends JFrame {
     
         String setClicked = ((SetBox)(me.getSource())).setName;
         
-        // TODO place to show new screen
-        System.out.println("Box clicked for set: " + setClicked);
-        
+        WordsSetDefPreview previewSc = new WordsSetDefPreview(this.categoryName, 
+                                                              setClicked);
+        previewSc.setLocationRelativeTo(this);
+        this.dispose();
+        previewSc.setVisible(true);
     }
     
     private void addSetButtActionPerformed(ActionEvent evt) {
