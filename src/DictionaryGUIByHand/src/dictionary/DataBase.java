@@ -6,7 +6,7 @@
 package dictionary;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  *
@@ -17,23 +17,26 @@ public class DataBase {
     public static void createNewTable() {
     
         // Connection string
-        String url = "jdbc:sqlite:sqlite/database.db";
+        String url = "jdbc:sqlite:sqlite/database3.db";
         
         // SQL statements
         String sql = "CREATE TABLE IF NOT EXISTS setup (\n"
                 + " id integer PRIMARY KEY,\n"
-                + " setName text NOT NULL,\n"
-                + " language1 text NOT NULL,\n"
-                + " language2 text NOT NULL,\n"
-                + " lastResult integer NOT NULL,\n"
-                + " bestResult integer NOT NULL\n"
+                + " category text NOT NULL,\n"
+                + " setName text,\n"
+                + " srcLanguage text,\n"
+                + " targetLanguage text,\n"
+                + " targetSide text,\n"
+                + " lastResult integer,\n"
+                + " bestResult integer\n"
                 + ");";
         
         String sql2 = "CREATE TABLE IF NOT EXISTS words (\n"
                 + " id integer PRIMARY KEY,\n"
-                + " setName text NOT NULL,\n"
-                + " word1 text NOT NULL,\n"
-                + " word2 text NOT NULL\n"
+                + " category text NOT NULL,\n"
+                + " setName text,\n"
+                + " srcWord text,\n"
+                + " targetWord text\n"
                 + ");";
         
         try (Connection conn = DriverManager.getConnection(url); 
@@ -50,7 +53,7 @@ public class DataBase {
     
     private Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:sqlite/database.db";
+        String url = "jdbc:sqlite:sqlite/database3.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -58,24 +61,6 @@ public class DataBase {
             System.out.println(e.getMessage());
         }
         return conn;
-    }
-    
-    public void insertToSetup(String setName, String language1, String language2) {
-        String sql = "INSERT INTO setup(setName,language1,language2,"
-                + "lastResult,bestResult) VALUES(?,?,?,?,?)";
- 
-        try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, setName);
-            pstmt.setString(2, language1);
-            pstmt.setString(3, language2);
-            // add zeros as result in initialization
-            pstmt.setInt(4, 0);
-            pstmt.setInt(5, 0);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
     }
     
     public void updateResult(int result, String setName) {
@@ -118,12 +103,10 @@ public class DataBase {
                 pstmt.executeUpdate();
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
-        }
+            }
         
         }
-            
-            
-        
+ 
     }
     
     public void getDataFromSetup() {
@@ -138,21 +121,46 @@ public class DataBase {
         }
     }
     
-    public void insertToWord(String setName, String word1, String word2) {
-        String sql = "INSERT INTO words(setName,word1,word2) VALUES(?,?,?)";
+    public void insertToWord(String category, String setName, String srcWord, 
+                             String targetWord) {
+        
+        String sql = "INSERT INTO words(category,setName,srcWord,targetWord) "
+                   + "VALUES(?,?,?,?)";
  
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, setName);
-            pstmt.setString(2, word1);
-            pstmt.setString(3, word2);
+            pstmt.setString(1, category);
+            pstmt.setString(2, setName);
+            pstmt.setString(3, srcWord);
+            pstmt.setString(4, targetWord);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
     
-
+    // Use it as initialization
+    public void insertToSetup(String category, String setName, String srcLanguage, 
+                              String targetLanguage, String targetSide) {
+        
+        String sql = "INSERT INTO setup(category,setName,srcLanguage,targetLanguage,"
+                + "targetSide,lastResult,bestResult) VALUES(?,?,?,?,?,?,?)";
+ 
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, category);
+            pstmt.setString(2, setName);
+            pstmt.setString(3, srcLanguage);
+            pstmt.setString(4, targetLanguage);
+            pstmt.setString(5, targetSide);
+            // add zeros as result in initialization
+            pstmt.setInt(6, 0);
+            pstmt.setInt(7, 0);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
     
     public void getDataFromWords(String setName) throws SQLException {
         String sql = String.format("SELECT id, setName, word1, word2 FROM words "
@@ -173,25 +181,46 @@ public class DataBase {
         
     }
     
-    public void removeRecords(String setName) {
-    
-        String sql1 = String.format("DELETE from setup WHERE setName = \'%s\'", setName);
-        String sql2 = String.format("DELETE from words WHERE setName = \'%s\'", setName);
+    public void removeRecords(String sql) {
 
         try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql1)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        
+    }
+    
+    public void updateRecords(String sql) {
+ 
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+    }
+    
+    public int countRecords(String sqlCommand) {
+    
+        int counter = 0;
         
         try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql2)) {
-            pstmt.executeUpdate();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlCommand)){
+
+            rs.next();
+            counter = rs.getInt("rowcount");
+            rs.close();
+            //System.out.println("MyTable has " + counter + " row(s).");
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         
+        return counter;
     }
     
     public ArrayList<String> getWords1() {
@@ -200,6 +229,34 @@ public class DataBase {
     
     public ArrayList<String> getWords2() {
         return this.words2;
+    }
+    
+    // TODO always use this function is case of getting data from db
+    public List<Map<String, Object>> getData(String sqlCommand) {
+
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        Map<String, Object> row = null;
+
+        try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlCommand)){
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            Integer columnCount = metaData.getColumnCount();
+
+            while (rs.next()) {
+                row = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    row.put(metaData.getColumnName(i), rs.getObject(i));
+                }
+                resultList.add(row);
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        
+        return resultList;
     }
     
     public static void main(String[] args) {
