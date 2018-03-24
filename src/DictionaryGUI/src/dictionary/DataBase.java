@@ -17,7 +17,7 @@ public class DataBase {
     public static void createNewTable() {
     
         // Connection string
-        String url = "jdbc:sqlite:sqlite/database3.db";
+        String url = "jdbc:sqlite:sqlite/database.db";
         
         // SQL statements
         String sql = "CREATE TABLE IF NOT EXISTS setup (\n"
@@ -53,7 +53,7 @@ public class DataBase {
     
     private Connection connect() {
         // SQLite connection string
-        String url = "jdbc:sqlite:sqlite/database3.db";
+        String url = "jdbc:sqlite:sqlite/database.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -61,64 +61,6 @@ public class DataBase {
             System.out.println(e.getMessage());
         }
         return conn;
-    }
-    
-    public void updateResult(int result, String setName) {
-    
-        String sql = String.format("UPDATE setup SET lastResult = %d WHERE "
-                + "setName = \'%s\'", result, setName);
- 
-        try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        
-        String sqlGetBestResult = String.format("SELECT bestResult FROM setup "
-                + "WHERE setName = \'%s\'", setName);
-        
-        int bestResult = 0;
-        
-        try (Connection conn = this.connect();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sqlGetBestResult)) {
-            
-            while (rs.next()) {
-                bestResult = rs.getInt("bestResult");
-            }
-            
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        
-        if (result > bestResult) {
-        
-            bestResult = result;
-            String sqlUpdateBestResult = String.format("UPDATE setup SET bestResult = %d WHERE "
-                + "setName = \'%s\'", bestResult, setName);
-            
-            try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sqlUpdateBestResult)) {
-                pstmt.executeUpdate();
-            } catch (SQLException e) {
-                System.out.println(e.getMessage());
-            }
-        
-        }
- 
-    }
-    
-    public void getDataFromSetup() {
-        String sql = "SELECT id, setName, language1, language2 FROM setup";
-
-        try (Connection conn = this.connect();
-             Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
     }
     
     public void insertToWord(String category, String setName, String srcWord, 
@@ -162,25 +104,6 @@ public class DataBase {
         }
     }
     
-    public void getDataFromWords(String setName) throws SQLException {
-        String sql = String.format("SELECT id, setName, word1, word2 FROM words "
-                + "WHERE setName LIKE \'%s\' ", setName);
-        
-        try (Connection conn = this.connect();
-            Statement stmt = conn.createStatement();
-            ResultSet rset = stmt.executeQuery(sql)) {
-            
-            while (rset.next()) {
-                words1.add(rset.getString("word1"));
-                words2.add(rset.getString("word2"));
-            }
-   
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        
-    }
-    
     public void removeRecords(String sql) {
 
         try (Connection conn = this.connect();
@@ -214,7 +137,6 @@ public class DataBase {
             rs.next();
             counter = rs.getInt("rowcount");
             rs.close();
-            //System.out.println("MyTable has " + counter + " row(s).");
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -223,15 +145,6 @@ public class DataBase {
         return counter;
     }
     
-    public ArrayList<String> getWords1() {
-        return this.words1;
-    }
-    
-    public ArrayList<String> getWords2() {
-        return this.words2;
-    }
-    
-    // TODO always use this function is case of getting data from db
     public List<Map<String, Object>> getData(String sqlCommand) {
 
         List<Map<String, Object>> resultList = new ArrayList<>();
@@ -268,9 +181,5 @@ public class DataBase {
         //db.getData();
     
     }
-    
-    //private ResultSet rs;
-    private ArrayList<String> words1 = new ArrayList<String>();
-    private ArrayList<String> words2 = new ArrayList<String>();
     
 }
